@@ -49,4 +49,4 @@ def euclidian_dist(v1, v2):
 #         dist += (v1[i] - v2[i]) ** 2
 #     return np.sqrt(dist)
 
-print(hamming_dist([10, 2000, 20, 4, 0, 0, 0], [2, 3000, 40, 5, 100, 4, 1]))
+# print(hamming_dist([10, 2000, 20, 4, 0, 0, 0], [2, 3000, 40, 5, 100, 4, 1]))
