@@ -1,19 +1,36 @@
 import csv
 import numpy as np
-import json
+
+# TODO: find a better name if possible
+def to_number_if_possible(value):
+    try:
+        return float(value)
+    except ValueError:
+        return value
 
 def save(filename, dataset):
-    with open(filename, "wb") as file:
-        json.dump(dataset, file)
+    with open(filename, "w") as file:
+        writer = csv.writer(file, delimiter=',',
+                    quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        for row in dataset:
+            writer.writerow(row)
 
 def load(filename):
-    with open(filename, "rb") as file:
-        return json.load(file)
+    with open(filename, "r", newline='') as file:
+        reader = csv.reader(file, delimiter=',', quotechar='|')
+        rows = []
+        for row in reader:
+            rows.append([to_number_if_possible(value) for value in row])
+        return rows
 
-def kNN(dataset, new_data, dfn, k=1):
+def kNN(dataset, new_data, dfn, c_index=-1, k=1):
     dist = []
     for data in dataset:
-        dist.append((dfn(data[:-1], new_data), data[-1]))
+        if c_index == -1:
+            without_class = data[:-1]
+        else:
+            without_class = data[0:c_index] + data[(c_index+1):]
+        dist.append((dfn(without_class, new_data), data[c_index]))
 
     dist.sort(key=lambda tup: tup[0])
 
@@ -48,5 +65,3 @@ def euclidian_dist(v1, v2):
 #     for i in range(len(v1)):
 #         dist += (v1[i] - v2[i]) ** 2
 #     return np.sqrt(dist)
-
-# print(hamming_dist([10, 2000, 20, 4, 0, 0, 0], [2, 3000, 40, 5, 100, 4, 1]))
