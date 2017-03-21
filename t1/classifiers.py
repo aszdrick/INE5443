@@ -1,28 +1,6 @@
 import csv
 import numpy as np
 
-# TODO: find a better name if possible
-def to_number_if_possible(value):
-    try:
-        return float(value)
-    except ValueError:
-        return value
-
-def save(filename, dataset):
-    with open(filename, "w") as file:
-        writer = csv.writer(file, delimiter=',',
-                    quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        for row in dataset:
-            writer.writerow(row)
-
-def load(filename):
-    with open(filename, "r", newline='') as file:
-        reader = csv.reader(file, delimiter=',', quotechar='|')
-        rows = []
-        for row in reader:
-            rows.append([to_number_if_possible(value) for value in row])
-        return rows
-
 def kNN(dataset, new_data, dfn, c_index=-1, k=1):
     dist = []
     for data in dataset:
