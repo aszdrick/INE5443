@@ -1,9 +1,11 @@
 #!/bin/python
 
-import argparse
-import classifiers as cl
 from math import floor
 from utils import empty
+
+import argparse
+import classifiers as cl
+import sys
 import utils
 
 parser = argparse.ArgumentParser(description='Classify some data.')
@@ -23,7 +25,6 @@ parser.add_argument('-l', '--slice', type=float, help='Automatically pick the gi
 
 args = parser.parse_args()
 
-  # (not args.spiral and not args.input) or
 if not args.distance or\
    not args.category or\
    empty(args.output) or\
@@ -34,6 +35,7 @@ if not args.distance or\
   (not empty(args.training_set) and not empty(args.slice)):
 
    parser.print_help()
+   sys.exit(0)
 
 training_header = []
 training_set = []
@@ -49,10 +51,6 @@ if args.input:
         training_header = data[0]
     input_set = data[1:]
 
-target_file = None
-if args.output:
-    target_file = args.output;
-
 distance_function = None
 if args.distance == 'euclidian':
     distance_function = cl.euclidian_dist
@@ -60,8 +58,6 @@ else:
     distance_function = cl.hamming_dist
 
 if args.slice:
-    # training = data[0:len(data):2]
-    # test = data[1:len(data):2]
     num_picked_entries = floor(len(input_set) * args.slice / 100)
     num_entries = len(input_set)
     i = 0
@@ -78,6 +74,8 @@ if args.slice:
         if i in picked_indexes:
             del input_set[i - offset]
             offset += 1
+
+target_file = args.output;
 
 output = []
 if not args.spiral:
