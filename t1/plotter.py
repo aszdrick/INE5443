@@ -41,3 +41,4 @@ def plot(data, result, training_set, categories, axis_labels, colors):
     )
 
     plt.show()
+    plt.close(fig)
