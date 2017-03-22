@@ -21,14 +21,6 @@ def load(filename):
             rows.append([normalize(value) for value in row])
         return rows
 
-def empty(value):
-    if value is None:
-        return True
-    t = type(value)
-    if t == type(0) or t == type(0.):
-        return False
-    return len(value) == 0
-
 def without_column(data, index):
     if index == -1:
         return data[:-1]

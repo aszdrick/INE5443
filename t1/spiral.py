@@ -3,9 +3,8 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
-def single_spiral(grid_size):
+def single_spiral(grid_size, noise = 0):
 	step = 1
-	noise = 0
 	radius = float(grid_size) + 15
 	theta = 0
 	result = []
@@ -19,8 +18,8 @@ def single_spiral(grid_size):
 		radius -= step
 	return result
 
-def double_spiral(grid_size):
-	original = single_spiral(grid_size)
+def double_spiral(grid_size, noise = 0):
+	original = single_spiral(grid_size, noise)
 	result = []
 	rotation = math.pi
 	sin = math.sin(rotation)
@@ -30,9 +29,9 @@ def double_spiral(grid_size):
 		xn = x * cos - y * sin
 		yn = x * sin + y * cos
 		result.append((xn, yn))
-	return [original, result]
+	return [single_spiral(grid_size, noise), result]
 
-data = double_spiral(400)
-plt.scatter([tp[0] for tp in data[0]], [tp[1] for tp in data[0]], color="r")
-plt.scatter([tp[0] for tp in data[1]], [tp[1] for tp in data[1]], color="b")
-plt.show()
+# data = double_spiral(400)
+# plt.scatter([tp[0] for tp in data[0]], [tp[1] for tp in data[0]], color="r")
+# plt.scatter([tp[0] for tp in data[1]], [tp[1] for tp in data[1]], color="b")
+# plt.show()

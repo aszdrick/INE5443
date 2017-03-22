@@ -1,7 +1,7 @@
 #!/bin/python
 
 from math import floor
-from utils import empty
+from spiral import *
 
 import argparse
 import classifiers as cl
@@ -19,6 +19,7 @@ parser.add_argument('-c', '--category', type=int, help='Column of the class')
 parser.add_argument('-I', '--ignore', action='append', type=int, help='Columns to be ignored')
 parser.add_argument('-s', '--spiral', type=str, choices=['single', 'double'], help='Number of spirals')
 parser.add_argument('-g', '--grid_size', type=int, help='Grid size (used for spirals only)')
+parser.add_argument('-n', '--noise', type=int, default=0, help='Noise for the spiral(s).')
 parser.add_argument('-v', '--verbose', action='store_true', help='Print additional statistics')
 parser.add_argument('-p', '--plot', action='store_true', help='Plot the classified patterns (if 2D)')
 parser.add_argument('-l', '--slice', type=float, help='Automatically pick the given approximate percentage of the input set to use as the training set')
@@ -29,6 +30,7 @@ if not args.distance or\
    not args.category or\
    not args.output or\
   (not args.spiral and not args.input) or\
+  (not args.spiral and args.noise) or\
   (args.spiral and (args.training_set or args.input)) or\
   (args.spiral and not args.grid_size) or\
   (args.input and not args.training_set and not args.slice) or\
@@ -101,3 +103,8 @@ if not args.spiral:
         output.append(prepared_entry + [class_value])
 
     utils.save(target_file, output)
+else:
+    if args.spiral == "single":
+        single_spiral(args.grid_size, args.noise)
+    else:
+        double_spiral(args.grid_size, args.noise)
