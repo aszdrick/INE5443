@@ -27,8 +27,8 @@ parser.add_argument('-l', '--slice', type=float, help='Automatically pick the gi
 args = parser.parse_args()
 
 if not args.distance or\
-   not args.category or\
    not args.output or\
+  (args.category == None) or\
   (not args.spiral and not args.input) or\
   (not args.spiral and args.noise) or\
   (args.spiral and (args.training_set or args.input)) or\
@@ -75,7 +75,6 @@ if args.slice:
         if i in picked_indexes:
             del input_set[i]
 
-category_offset = 0
 if args.ignore:
     args.ignore.sort(reverse=True)
     for entry in training_set:
@@ -88,23 +87,38 @@ if args.ignore:
 
     for index in args.ignore:
         if index < args.category:
-            category_offset += 1
+            args.category -= 1
         del training_header[index]
 
 target_file = args.output
 
 output = []
 if not args.spiral:
+    hits = 0
+    fails = 0
     output.append(training_header)
     for entry in input_set:
-        prepared_entry = utils.without_column(entry, args.category - category_offset)
+        prepared_entry = utils.without_column(entry, args.category)
         class_value = cl.kNN(training_set, prepared_entry, distance_function, \
-                             args.category - category_offset, args.k)
+                             args.category, args.k)
         output.append(prepared_entry + [class_value])
+        if entry[args.category] != None:
+            if entry[args.category] == class_value:
+                hits += 1
+            else:
+                fails += 1
 
     utils.save(target_file, output)
+    if hits + fails > 0:
+        print("Hits: %i" % (hits))
+        print("Fails: %i" % (fails))
+        print("Precision: %f%%" % (100 * hits / (hits + fails)))
 else:
     if args.spiral == "single":
-        single_spiral(args.grid_size, args.noise)
+        data = single_spiral(args.grid_size, args.noise)
+        plt.scatter([tp[0] for tp in data], [tp[1] for tp in data], color="r")
     else:
-        double_spiral(args.grid_size, args.noise)
+        data = double_spiral(args.grid_size, args.noise)
+        plt.scatter([tp[0] for tp in data[0]], [tp[1] for tp in data[0]], color="r")
+        plt.scatter([tp[0] for tp in data[1]], [tp[1] for tp in data[1]], color="b")
+    plt.show()
