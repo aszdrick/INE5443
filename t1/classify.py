@@ -1,12 +1,13 @@
 #!/bin/python
 
-from math import floor
-from spiral import *
-
 import argparse
-import classifiers as cl
 import sys
+from math import floor
+from matplotlib.colors import cnames
+
+import classifiers as cl
 import utils
+from spiral import *
 
 parser = argparse.ArgumentParser(description='Classify some data.')
 
@@ -113,36 +114,66 @@ if not args.spiral:
         print("Hits: %i" % (hits))
         print("Fails: %i" % (fails))
         print("Precision: %f%%" % (100 * hits / (hits + fails)))
+
+    if args.plot and len(training_set) == 3:
+        import plotter as pl
+        
+        allcolors = [color for color in cnames]
+        categories = list(set([x[args.category] for x in training_set]))
+        
+        pl.plot(
+            output[:1],
+            output[2],
+            training_set[:1],
+            training_set[:2],
+            utils.without_column(training_header, args.category),
+            [allcolors[i] for i in range(len(categories))]
+        )
 else:
     neighborhood = 2 * args.grid_size + 50
     if args.spiral == "single":
-        data = single_spiral(args.grid_size, args.noise)
-        # plt.scatter([tp[0] for tp in data], [tp[1] for tp in data], color="r")
+        spiral = single_spiral(args.grid_size, args.noise)
+        size = args.grid_size
+        spiral_points = [(spiral[i][0] + size, spiral[i][1] + size, 0) \
+                         for i in range(len(spiral)) if not (i % 2)] + \
+                        [(spiral[i][0] + size, spiral[i][1] + size, 1) \
+                         for i in range(len(spiral)) if (i % 2)]
     else:
         spirals = double_spiral(args.grid_size, args.noise)
         spiral_points = [(s[0] + args.grid_size, s[1] + args.grid_size, 0) for s in spirals[0]]\
                       + [(s[0] + args.grid_size, s[1] + args.grid_size, 1) for s in spirals[1]]
-        # spiral_points = spirals[0] + spirals[1]
-        red_points = []
-        blue_points = []
-        for x in range(neighborhood):
-            for y in range(neighborhood):
-                entry = (x, y)
-                class_value = cl.kNN(spiral_points, entry, distance_function, \
-                                     2, args.k)
-                if class_value == 0:
-                    red_points.append(entry)
-                else:
-                    blue_points.append(entry)
+    
+    red_points = []
+    blue_points = []
+    for x in range(neighborhood):
+        for y in range(neighborhood):
+            entry = (x, y)
+            class_value = cl.kNN(spiral_points, entry, distance_function, \
+                                 2, args.k)
+            if class_value == 0:
+                red_points.append(entry)
+            else:
+                blue_points.append(entry)
 
-        first = [(255, 0, 0) for point in red_points]
-        second = [(0, 0, 255) for point in blue_points]
+    first = [(255, 0, 0) for point in red_points]
+    second = [(0, 0, 255) for point in blue_points]
 
-        if args.save_image:
-            import imagesaver
-            imagesaver.save(points, first + second, neighborhood, args.output)
+    if args.save_image:
+        import imagesaver
+        imagesaver.save(red_points + blue_points, first + second, neighborhood, args.output)
 
-        # plt.scatter([tp[0] for tp in data[0]], [tp[1] for tp in data[0]], color="r")
-        # plt.scatter([tp[0] for tp in data[1]], [tp[1] for tp in data[1]], color="b")
-    plt.show()
+    if args.plot:
+        import plotter as pl
 
+        output = red_points + blue_points
+        result = first + second
+
+        pl.plot(
+            output,
+            result,
+            spiral_points[:1],
+            [(255, 0, 0) for point in spiral_points if point[2] == 0] + \
+            [(0, 0, 255) for point in spiral_points if point[2] == 1],
+            ['x', 'y'],
+            {(255, 0, 0) : 'red', (0, 0, 255) : 'blue'}
+        )
