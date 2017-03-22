@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 def single_spiral(grid_size, noise = 0):
 	step = 1
-	radius = float(grid_size) + 15
+	radius = float(grid_size)
 	theta = 0
 	result = []
 	for i in range(int(grid_size / step)):

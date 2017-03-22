@@ -109,7 +109,7 @@ if not args.spiral:
                 fails += 1
 
     utils.save(target_file, output)
-    if hits + fails > 0:
+    if args.verbose and hits + fails > 0:
         print("Hits: %i" % (hits))
         print("Fails: %i" % (fails))
         print("Precision: %f%%" % (100 * hits / (hits + fails)))
