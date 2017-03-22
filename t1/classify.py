@@ -27,12 +27,12 @@ args = parser.parse_args()
 
 if not args.distance or\
    not args.category or\
-   empty(args.output) or\
-  (empty(args.spiral) and empty(args.input)) or\
-  (not empty(args.spiral) and (not empty(args.training_set) or not empty(args.input))) or\
-  (not empty(args.spiral) and empty(args.grid_size)) or\
-  (not empty(args.input) and empty(args.training_set) and empty(args.slice)) or\
-  (not empty(args.training_set) and not empty(args.slice)):
+   not args.output or\
+  (not args.spiral and not args.input) or\
+  (args.spiral and (args.training_set or args.input)) or\
+  (args.spiral and not args.grid_size) or\
+  (args.input and not args.training_set and not args.slice) or\
+  (args.training_set and args.slice):
 
    parser.print_help()
    sys.exit(0)
@@ -69,21 +69,35 @@ if args.slice:
         picked_indexes.add(i)
         i += 2
 
-    offset = 0
-    for i in range(num_entries):
+    for i in range(num_entries - 1, -1, -1):
         if i in picked_indexes:
-            del input_set[i - offset]
-            offset += 1
+            del input_set[i]
 
-target_file = args.output;
+category_offset = 0
+if args.ignore:
+    args.ignore.sort(reverse=True)
+    for entry in training_set:
+        for index in args.ignore:
+            del entry[index]
+
+    for entry in input_set:
+        for index in args.ignore:
+            del entry[index]
+
+    for index in args.ignore:
+        if index < args.category:
+            category_offset += 1
+        del training_header[index]
+
+target_file = args.output
 
 output = []
 if not args.spiral:
     output.append(training_header)
     for entry in input_set:
-        prepared_entry = utils.without_column(entry, args.category)
+        prepared_entry = utils.without_column(entry, args.category - category_offset)
         class_value = cl.kNN(training_set, prepared_entry, distance_function, \
-                             args.category, args.k)
+                             args.category - category_offset, args.k)
         output.append(prepared_entry + [class_value])
 
     utils.save(target_file, output)
