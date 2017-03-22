@@ -25,17 +25,16 @@ def plot(data, result, training_set, categories, axis_labels, colors):
     for cat in colors:
         mc.append(mpatches.Patch(color=colors[cat]))
 
-    fontP = FontProperties()
-    fontP.set_size('small')
+    handles = [mo, mt] + mc
     plt.legend(
-        [mo, mt] + mc,
+        handles,
         ["Classified data", "Training data"] + [cat for cat in colors],
         scatterpoints=1,
         fontsize='small',
         bbox_to_anchor=(0., 1., 1., .024),
         loc=3,
         fancybox=False,
-        ncol=6,
+        ncol= 3,
         mode="expand",
         borderaxespad=0.,
         edgecolor='black'
