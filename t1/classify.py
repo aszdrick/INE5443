@@ -15,7 +15,7 @@ parser.add_argument('-k', type=int, default=1, help='k Nearest Neighbor classifi
 parser.add_argument('-d', '--distance', required=True, choices=['euclidian', 'hamming+'], help='Distance metric algorithm')
 parser.add_argument('-t', '--training_set', type=str, help='Filename of the training set, must be a CSV file')
 parser.add_argument('-i', '--input', type=str, help='Filename of the input to classify, must be a CSV file')
-parser.add_argument('-o', '--output', required=True, type=str, help='Output file')
+parser.add_argument('-o', '--output', required=True, type=str, default=out, help='Output file')
 parser.add_argument('-c', '--category', type=int, help='Column of the class')
 parser.add_argument('-I', '--ignore', action='append', type=int, help='Columns to be ignored')
 parser.add_argument('-s', '--spiral', type=str, choices=['single', 'double'], help='Number of spirals')
@@ -115,19 +115,19 @@ if not args.spiral:
         print("Fails: %i" % (fails))
         print("Precision: %f%%" % (100 * hits / (hits + fails)))
 
-    if args.plot and len(training_set) == 3:
+    if args.plot and len(training_set[0]) == 3:
         import plotter as pl
         
         allcolors = [color for color in cnames]
         categories = list(set([x[args.category] for x in training_set]))
-        
+
         pl.plot(
-            output[:1],
-            output[2],
-            training_set[:1],
-            training_set[:2],
+            [x[:2] for x in output[1:]],
+            [x[2] for x in output[1:]],
+            [x[:2] for x in training_set],
+            [x[2] for x in training_set],
             utils.without_column(training_header, args.category),
-            [allcolors[i] for i in range(len(categories))]
+            {categories[i]: allcolors[((i + 1) * 666) % len(allcolors)] for i in range(len(categories))}
         )
 else:
     neighborhood = 2 * args.grid_size + 50
