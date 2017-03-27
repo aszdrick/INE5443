@@ -62,7 +62,7 @@ def mahalanobis(mahalanobis_type):
 parser = argparse.ArgumentParser(description='Classify some data.')
 
 parser.add_argument('-k', type=int, default=1, help='k Nearest Neighbor classifier')
-parser.add_argument('-d', '--distance', required=True, choices=['euclidian', 'hamming+', 'linear_mahalanobis', 'quadratic_mahalanobis'], help='Distance metric algorithm')
+parser.add_argument('-d', '--distance', required=True, choices=['euclidean', 'hamming+', 'linear_mahalanobis', 'quadratic_mahalanobis'], help='Distance metric algorithm')
 parser.add_argument('-t', '--training_set', type=str, help='Filename of the training set, must be a CSV file')
 parser.add_argument('-i', '--input', type=str, help='Filename of the input to classify, must be a CSV file')
 parser.add_argument('-o', '--output', required=True, type=str, default='out', help='Output file')
@@ -124,6 +124,7 @@ output = []
 if args.distance == 'linear_mahalanobis' or args.distance == 'quadratic_mahalanobis':
     mahalanobis(args.distance)
 elif args.voronoi:
+    from scipy.spatial import Voronoi, voronoi_plot_2d
     if args.spiral:
         if args.spiral == "single":
             spiral = single_spiral(args.grid_size, args.noise)
@@ -137,14 +138,9 @@ elif args.voronoi:
             training_set = [(s[0] + args.grid_size, s[1] + args.grid_size, 0) for s in spirals[0]]\
                          + [(s[0] + args.grid_size, s[1] + args.grid_size, 1) for s in spirals[1]]
 
-    from scipy.spatial import Voronoi, voronoi_plot_2d
-    # points = [(p[0], p[1]) for p in training_set]
-    # voronoi = Voronoi(points)
-    # voronoi_plot_2d(voronoi)
-    # plt.show()
-    x = [p[0] for p in training_set]
-    y = [p[1] for p in training_set]
-    plt.scatter(x, y)
+    points = [(p[0], p[1]) for p in training_set]
+    voronoi = Voronoi(points)
+    voronoi_plot_2d(voronoi)
     plt.show()
 
 elif not args.spiral:
