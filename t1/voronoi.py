@@ -22,8 +22,10 @@ elif args.singlespiral or args.doublespiral:
 	command += " --spiral "
 	if args.singlespiral:
 		command += "single"
+		command += " -g " + str(args.singlespiral)
 	else:
 		command += "double"
+		command += " -g " + str(args.doublespiral)
 	if args.noise:
 		command += " --noise " + args.noise
 else:
