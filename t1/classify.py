@@ -9,6 +9,56 @@ import classifiers as cl
 import utils
 from spiral import *
 
+def slice_data(input_set, slice_percentage):
+    num_picked_entries = floor(len(input_set) * slice_percentage / 100)
+    num_entries = len(input_set)
+    i = 0
+    training_set = []
+    picked_indexes = set()
+    while len(training_set) < num_picked_entries:
+        if i >= num_entries:
+            i = 1
+        training_set.append(input_set[i])
+        picked_indexes.add(i)
+        i += 2
+
+    for i in range(num_entries - 1, -1, -1):
+        if i in picked_indexes:
+            del input_set[i]
+    return training_set
+
+def ignore_columns(input_set, training_set, training_header, args):
+    args.ignore.sort(reverse=True)
+    for entry in training_set:
+        for index in args.ignore:
+            del entry[index]
+
+    for entry in input_set:
+        for index in args.ignore:
+            del entry[index]
+
+    for index in args.ignore:
+        if index < args.category:
+            args.category -= 1
+        del training_header[index]
+
+def mahalanobis(mahalanobis_type):
+    # TODO: show an interactable plot and change the following
+    # variables accordingly. Both should be (r, g, b) lists
+    training_set = []
+    pixels = []
+
+    # TODO: find a better name for this function
+    def deal_with_it(pixel, distance):
+        # TODO: do something with distance (e.g color the pixel
+        # according to the distance)
+        print(pixel, "-> distance =", distance)
+
+    if mahalanobis_type == 'linear_mahalanobis':
+        utils.linear_mahalanobis(training_set, pixels, deal_with_it)
+    else:
+        utils.quadratic_mahalanobis(training_set, pixels, deal_with_it)
+
 parser = argparse.ArgumentParser(description='Classify some data.')
 
 parser.add_argument('-k', type=int, default=1, help='k Nearest Neighbor classifier')
@@ -25,10 +75,11 @@ parser.add_argument('-v', '--verbose', action='store_true', help='Print addition
 parser.add_argument('-p', '--plot', action='store_true', help='Plot the classified patterns (if 2D)')
 parser.add_argument('-l', '--slice', type=float, help='Automatically pick the given approximate percentage of the input set to use as the training set')
 parser.add_argument('-S', '--save_image', action='store_true', help='Save the resulting spiral as an image')
+parser.add_argument('-V', '--voronoi', action='store_true', help='Plot the corresponding voronoi diagram')
 
 args = parser.parse_args()
 
-# TODO: validate the input flags if it's mahalanobis
+# TODO: validate the input flags if it's mahalanobis or voronoi
 if not args.output or\
   (not args.spiral and args.category == None) or\
   (not args.spiral and not args.input) or\
@@ -62,55 +113,39 @@ elif args.distance == 'hamming+':
     distance_function = cl.hamming_dist
 
 if args.slice:
-    num_picked_entries = floor(len(input_set) * args.slice / 100)
-    num_entries = len(input_set)
-    i = 0
-    picked_indexes = set()
-    while len(training_set) < num_picked_entries:
-        if i >= num_entries:
-            i = 1
-        training_set.append(input_set[i])
-        picked_indexes.add(i)
-        i += 2
-
-    for i in range(num_entries - 1, -1, -1):
-        if i in picked_indexes:
-            del input_set[i]
+    training_set = slice_data(input_set, args.slice)
 
 if args.ignore:
-    args.ignore.sort(reverse=True)
-    for entry in training_set:
-        for index in args.ignore:
-            del entry[index]
-
-    for entry in input_set:
-        for index in args.ignore:
-            del entry[index]
-
-    for index in args.ignore:
-        if index < args.category:
-            args.category -= 1
-        del training_header[index]
+    ignore_columns(input_set, training_set, training_header, args)
 
 target_file = args.output
 
 output = []
 if args.distance == 'linear_mahalanobis' or args.distance == 'quadratic_mahalanobis':
-    # TODO: show an interactable plot and change the following
-    # variables accordingly. Both should be (r, g, b) lists
-    training_set = []
-    pixels = []
+    mahalanobis(args.distance)
+elif args.voronoi:
+    if args.spiral:
+        if args.spiral == "single":
+            spiral = single_spiral(args.grid_size, args.noise)
+            size = args.grid_size
+            training_set = [(spiral[i][0] + size, spiral[i][1] + size, 0) \
+                             for i in range(len(spiral)) if not (i % 2)] + \
+                            [(spiral[i][0] + size, spiral[i][1] + size, 1) \
+                             for i in range(len(spiral)) if (i % 2)]
+        else:
+            spirals = double_spiral(args.grid_size, args.noise)
+            training_set = [(s[0] + args.grid_size, s[1] + args.grid_size, 0) for s in spirals[0]]\
+                         + [(s[0] + args.grid_size, s[1] + args.grid_size, 1) for s in spirals[1]]
 
-    # TODO: find a better name for this function
-    def deal_with_it(pixel, distance):
-        # TODO: do something with distance (e.g color the pixel
-        # according to the distance)
-        print(pixel, "-> distance =", distance)
-
-    if args.distance == 'linear_mahalanobis':
-        utils.linear_mahalanobis(training_set, pixels, deal_with_it)
-    else:
-        utils.quadratic_mahalanobis(training_set, pixels, deal_with_it)
+    from scipy.spatial import Voronoi, voronoi_plot_2d
+    # points = [(p[0], p[1]) for p in training_set]
+    # voronoi = Voronoi(points)
+    # voronoi_plot_2d(voronoi)
+    # plt.show()
+    x = [p[0] for p in training_set]
+    y = [p[1] for p in training_set]
+    plt.scatter(x, y)
+    plt.show()
 
 elif not args.spiral:
     hits = 0
