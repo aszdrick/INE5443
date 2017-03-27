@@ -22,4 +22,4 @@ parser.add_argument('-S', '--save_image', action='store_true', help='Save the re
 parser.add_argument('-V', '--voronoi', action='store_true', help='Plot the corresponding voronoi diagram')
 
 args = parser.parse_args()
-main(args)
+main(parser, args)

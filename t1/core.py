@@ -56,7 +56,7 @@ def mahalanobis(mahalanobis_type):
     else:
         utils.quadratic_mahalanobis(training_set, pixels, deal_with_it)
 
-def main(args):
+def main(parser, args):
     # TODO: validate the input flags if it's mahalanobis or voronoi
     if not args.output or\
       (not args.spiral and args.category == None) or\
@@ -64,7 +64,7 @@ def main(args):
       (not args.spiral and args.noise) or\
       (args.spiral and (args.training_set or args.input)) or\
       (args.spiral and not args.grid_size) or\
-      (args.input and not args.training_set and not args.slice) or\
+      (not args.voronoi and args.input and not args.training_set and not args.slice) or\
       (args.training_set and args.slice):
 
        parser.print_help()
@@ -115,6 +115,8 @@ def main(args):
                 spirals = double_spiral(args.grid_size, args.noise)
                 training_set = [(s[0] + args.grid_size, s[1] + args.grid_size, 0) for s in spirals[0]]\
                              + [(s[0] + args.grid_size, s[1] + args.grid_size, 1) for s in spirals[1]]
+        elif len(training_set) == 0:
+            training_set = input_set
 
         points = [(p[0], p[1]) for p in training_set]
         voronoi = Voronoi(points)
