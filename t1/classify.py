@@ -2,7 +2,7 @@
 
 import argparse
 import sys
-from math import floor
+from math import floor, sqrt
 from matplotlib.colors import cnames
 
 import classifiers as cl
@@ -12,7 +12,7 @@ from spiral import *
 parser = argparse.ArgumentParser(description='Classify some data.')
 
 parser.add_argument('-k', type=int, default=1, help='k Nearest Neighbor classifier')
-parser.add_argument('-d', '--distance', required=True, choices=['euclidian', 'hamming+'], help='Distance metric algorithm')
+parser.add_argument('-d', '--distance', required=True, choices=['euclidian', 'hamming+', 'linear_mahalanobis', 'quadratic_mahalanobis'], help='Distance metric algorithm')
 parser.add_argument('-t', '--training_set', type=str, help='Filename of the training set, must be a CSV file')
 parser.add_argument('-i', '--input', type=str, help='Filename of the input to classify, must be a CSV file')
 parser.add_argument('-o', '--output', required=True, type=str, default='out', help='Output file')
@@ -28,6 +28,7 @@ parser.add_argument('-S', '--save_image', action='store_true', help='Save the re
 
 args = parser.parse_args()
 
+# TODO: validate the input flags if it's mahalanobis
 if not args.output or\
   (not args.spiral and args.category == None) or\
   (not args.spiral and not args.input) or\
@@ -57,7 +58,7 @@ if args.input:
 distance_function = None
 if args.distance == 'euclidian':
     distance_function = cl.euclidian_dist
-else:
+elif args.distance == 'hamming+':
     distance_function = cl.hamming_dist
 
 if args.slice:
@@ -94,7 +95,24 @@ if args.ignore:
 target_file = args.output
 
 output = []
-if not args.spiral:
+if args.distance == 'linear_mahalanobis' or args.distance == 'quadratic_mahalanobis':
+    # TODO: show an interactable plot and change the following
+    # variables accordingly. Both should be (r, g, b) lists
+    training_set = []
+    pixels = []
+
+    # TODO: find a better name for this function
+    def deal_with_it(pixel, distance):
+        # TODO: do something with distance (e.g color the pixel
+        # according to the distance)
+        print(pixel, "-> distance =", distance)
+
+    if args.distance == 'linear_mahalanobis':
+        utils.linear_mahalanobis(training_set, pixels, deal_with_it)
+    else:
+        utils.quadratic_mahalanobis(training_set, pixels, deal_with_it)
+
+elif not args.spiral:
     hits = 0
     fails = 0
     output.append(training_header)

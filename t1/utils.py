@@ -26,3 +26,9 @@ def without_column(data, index):
         return data[:-1]
     else:
         return data[0:index] + data[(index+1):]
+
+def tuple_difference(first, second):
+    result = ()
+    for i in range(len(first)):
+        result += (first[i] - second[i],)
+    return result
