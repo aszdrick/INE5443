@@ -2,7 +2,7 @@
 
 import argparse
 import sys
-from math import floor, sqrt
+from math import floor
 from matplotlib.colors import cnames
 
 import classifiers as cl

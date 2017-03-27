@@ -1,4 +1,5 @@
 import csv
+from math import sqrt
 import numpy as np
 
 def kNN(dataset, new_data, dfn, c_index=-1, k=1):
@@ -73,7 +74,7 @@ def linear_mahalanobis(training_set, pixels, callback):
         deltaT = np.array([delta]).transpose()
         result = np.dot([delta], Ainv)
         result = np.dot(result, deltaT)
-        distance = result[0][0]
+        distance = sqrt(result[0][0])
         callback(pixel, distance)
 
 def quadratic_mahalanobis(training_set, pixels, callback):
@@ -132,5 +133,5 @@ def quadratic_mahalanobis(training_set, pixels, callback):
         deltaT = np.array([delta]).transpose()
         result = np.dot([delta], Ainv)
         result = np.dot(result, deltaT)
-        distance = result[0][0]
+        distance = sqrt(result[0][0])
         callback(pixel, distance)
