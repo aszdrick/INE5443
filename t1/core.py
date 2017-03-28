@@ -4,7 +4,10 @@ from matplotlib.colors import cnames
 
 import classifiers as cl
 import utils
+import plotter as pl
 from spiral import *
+
+allcolors = [color for color in sorted(cnames)]
 
 def slice_data(input_set, slice_percentage):
     num_picked_entries = floor(len(input_set) * slice_percentage / 100)
@@ -105,8 +108,10 @@ def main(parser, args):
     if is_mahalanobis:
         mahalanobis(args.distance, args.input)
     elif args.voronoi:
-        from scipy.spatial import Voronoi, voronoi_plot_2d
+        from scipy.spatial import Voronoi
+        # from matplotlib.pyplot import cm
         if args.spiral:
+            args.category = 2
             if args.spiral == "single":
                 spiral = single_spiral(args.grid_size, args.noise)
                 size = args.grid_size
@@ -123,8 +128,18 @@ def main(parser, args):
 
         points = [(p[0], p[1]) for p in training_set]
         voronoi = Voronoi(points)
-        voronoi_plot_2d(voronoi)
-        plt.show()
+        categories = [p[2] for p in training_set]
+        num_cat = len(list(set(categories)))
+        # colors_only = [(color[0], color[1], color[2]) for color in cm.rainbow(np.linspace(0,1,len(categories_pure)))]
+        colors = {categories[i]: allcolors[((i + 1) * 41) % len(allcolors)] for i in range(num_cat)}
+
+        pl.plot_voronoi(
+            voronoi,
+            points,
+            categories,
+            utils.without_column(training_header, args.category),
+            colors
+        )
 
     elif not args.spiral:
         hits = 0
@@ -148,9 +163,6 @@ def main(parser, args):
             print("Precision: %f%%" % (100 * hits / (hits + fails)))
 
         if args.plot and len(training_set[0]) == 3:
-            import plotter as pl
-            
-            allcolors = [color for color in sorted(cnames)]
             categories = list(set([x[args.category] for x in training_set]))
 
             pl.plot(
@@ -180,8 +192,7 @@ def main(parser, args):
         for x in range(neighborhood):
             for y in range(neighborhood):
                 entry = (x, y)
-                class_value = cl.kNN(spiral_points, entry, distance_function, \
-                                     2, args.k)
+                class_value = cl.kNN(spiral_points, entry, distance_function, 2, args.k)
                 if class_value == 0:
                     red_points.append(entry)
                 else:
@@ -195,8 +206,6 @@ def main(parser, args):
             imagesaver.save(red_points + blue_points, first + second, neighborhood, args.output)
 
         if args.plot:
-            import plotter as pl
-
             output = red_points + blue_points
             result = first + second
 
