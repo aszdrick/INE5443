@@ -6,7 +6,8 @@ from core import main
 parser = argparse.ArgumentParser(description='Classify some data.')
 
 parser.add_argument('-k', type=int, default=1, help='k Nearest Neighbor classifier')
-parser.add_argument('-d', '--distance', choices=['euclidean', 'hamming+', 'linear_mahalanobis', 'quadratic_mahalanobis'], help='Distance metric algorithm')
+parser.add_argument('-d', '--distance', choices=['euclidean', 'hamming+', 'linear_mahalanobis', 'quadratic_mahalanobis'],
+    default='euclidean', help='Distance metric algorithm')
 parser.add_argument('-t', '--training_set', type=str, help='Filename of the training set, must be a CSV file')
 parser.add_argument('-i', '--input', type=str, help='Filename of the input to classify, must be a CSV file')
 parser.add_argument('-o', '--output', type=str, default='out', help='Output file')

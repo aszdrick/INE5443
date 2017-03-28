@@ -68,6 +68,7 @@ def main(parser, args):
       (not args.spiral and args.noise) or\
       (args.spiral and (args.training_set or args.input)) or\
       (args.spiral and not args.grid_size) or\
+      (args.spiral and args.save_image and not args.output) or\
       (not args.voronoi and not is_mahalanobis and args.input and not args.training_set and not args.slice) or\
       (args.training_set and args.slice):
 
@@ -89,7 +90,7 @@ def main(parser, args):
         input_set = data[1:]
 
     distance_function = None
-    if args.distance == 'euclidian':
+    if args.distance == 'euclidean':
         distance_function = cl.euclidian_dist
     elif args.distance == 'hamming+':
         distance_function = cl.hamming_dist
