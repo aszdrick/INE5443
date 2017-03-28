@@ -39,11 +39,15 @@ def ignore_columns(input_set, training_set, training_header, args):
             args.category -= 1
         del training_header[index]
 
-def mahalanobis(mahalanobis_type):
-    # TODO: show an interactable plot and change the following
+def mahalanobis(mahalanobis_type, filename):
+    # TODO: show an interactive plot and change the following
     # variables accordingly. Both should be (r, g, b) lists
     training_set = []
     pixels = []
+
+    if (len(training_set) == 0 or len(pixels) == 0):
+        print("Error: empty image and/or training set")
+        return
 
     # TODO: find a better name for this function
     def deal_with_it(pixel, distance):
@@ -52,19 +56,19 @@ def mahalanobis(mahalanobis_type):
         print(pixel, "-> distance =", distance)
 
     if mahalanobis_type == 'linear_mahalanobis':
-        utils.linear_mahalanobis(training_set, pixels, deal_with_it)
+        cl.linear_mahalanobis(training_set, pixels, deal_with_it)
     else:
-        utils.quadratic_mahalanobis(training_set, pixels, deal_with_it)
+        cl.quadratic_mahalanobis(training_set, pixels, deal_with_it)
 
 def main(parser, args):
-    # TODO: validate the input flags if it's mahalanobis or voronoi
+    is_mahalanobis = (args.distance == 'linear_mahalanobis' or args.distance == 'quadratic_mahalanobis')
     if not args.output or\
-      (not args.spiral and args.category == None) or\
+      (not args.spiral and not is_mahalanobis and args.category == None) or\
       (not args.spiral and not args.input) or\
       (not args.spiral and args.noise) or\
       (args.spiral and (args.training_set or args.input)) or\
       (args.spiral and not args.grid_size) or\
-      (not args.voronoi and args.input and not args.training_set and not args.slice) or\
+      (not args.voronoi and not is_mahalanobis and args.input and not args.training_set and not args.slice) or\
       (args.training_set and args.slice):
 
        parser.print_help()
@@ -99,8 +103,8 @@ def main(parser, args):
     target_file = args.output
 
     output = []
-    if args.distance == 'linear_mahalanobis' or args.distance == 'quadratic_mahalanobis':
-        mahalanobis(args.distance)
+    if is_mahalanobis:
+        mahalanobis(args.distance, args.input)
     elif args.voronoi:
         from scipy.spatial import Voronoi, voronoi_plot_2d
         if args.spiral:

@@ -27,7 +27,7 @@ elif args.singlespiral or args.doublespiral:
 		command += "double"
 		command += " -g " + str(args.doublespiral)
 	if args.noise:
-		command += " --noise " + args.noise
+		command += " --noise " + str(args.noise)
 else:
 	parser.print_help()
 	sys.exit(0)
