@@ -1,6 +1,7 @@
 import csv
 from math import sqrt
 import numpy as np
+import sys
 
 def kNN(dataset, new_data, dfn, c_index=-1, k=1):
     dist = []
@@ -45,7 +46,6 @@ def euclidian_dist(v1, v2):
 #         dist += (v1[i] - v2[i]) ** 2
 #     return np.sqrt(dist)
 
-# TODO: can we generalize the following two functions?
 def linear_mahalanobis(training_set, pixels, callback):
     r = []
     g = []
@@ -66,9 +66,11 @@ def linear_mahalanobis(training_set, pixels, callback):
     size = len(training_set)
     center = (r_sum / size, g_sum / size, b_sum / size)
     A = np.cov(np.array([r, g, b]))
-    # TODO: what to do if A is singular? (the following line
-    # will throw an exception if it happens)
-    Ainv = np.linalg.inv(A)
+    try:
+        Ainv = np.linalg.inv(A)
+    except:
+        print("Error: failed to invert the pixel matrix")
+        sys.exit(0)
     for pixel in pixels:
         delta = utils.tuple_difference(pixel, center)
         deltaT = np.array([delta]).transpose()
@@ -124,9 +126,11 @@ def quadratic_mahalanobis(training_set, pixels, callback):
               r2_sum / size, g2_sum / size, b2_sum / size,\
               rg_sum / size, rb_sum / size, gb_sum / size)
     A = np.cov(np.array([r, g, b, r2, g2, b2, rg, rb, gb]))
-    # TODO: what to do if A is singular? (the following line
-    # will throw an exception if it happens)
-    Ainv = np.linalg.inv(A)
+    try:
+        Ainv = np.linalg.inv(A)
+    except:
+        print("Error: failed to invert the pixel matrix")
+        sys.exit(0)
     for (r, g, b) in pixels:
         pixel = (r, g, b, r * r, g * g, b * b, r * g, r * b, g * b)
         delta = utils.tuple_difference(prepared_pixel, center)

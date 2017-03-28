@@ -49,16 +49,15 @@ def mahalanobis(mahalanobis_type, filename):
         print("Error: empty image and/or training set")
         return
 
-    # TODO: find a better name for this function
-    def deal_with_it(pixel, distance):
+    def process_pixel_distance(pixel, distance):
         # TODO: do something with distance (e.g color the pixel
         # according to the distance)
         print(pixel, "-> distance =", distance)
 
     if mahalanobis_type == 'linear_mahalanobis':
-        cl.linear_mahalanobis(training_set, pixels, deal_with_it)
+        cl.linear_mahalanobis(training_set, pixels, process_pixel_distance)
     else:
-        cl.quadratic_mahalanobis(training_set, pixels, deal_with_it)
+        cl.quadratic_mahalanobis(training_set, pixels, process_pixel_distance)
 
 def main(parser, args):
     is_mahalanobis = (args.distance == 'linear_mahalanobis' or args.distance == 'quadratic_mahalanobis')
@@ -68,7 +67,6 @@ def main(parser, args):
       (not args.spiral and args.noise) or\
       (args.spiral and (args.training_set or args.input)) or\
       (args.spiral and not args.grid_size) or\
-      (args.spiral and args.save_image and not args.output) or\
       (not args.voronoi and not is_mahalanobis and args.input and not args.training_set and not args.slice) or\
       (args.training_set and args.slice):
 
