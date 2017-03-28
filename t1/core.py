@@ -110,15 +110,17 @@ def main(parser, args):
     elif args.voronoi:
         from scipy.spatial import Voronoi
         # from matplotlib.pyplot import cm
+        show_legend = True
         if args.spiral:
             args.category = 2
+            training_header = ["x", "y"]
             if args.spiral == "single":
+                show_legend = False
                 spiral = single_spiral(args.grid_size, args.noise)
+                training_set = []
                 size = args.grid_size
-                training_set = [(spiral[i][0] + size, spiral[i][1] + size, 0) \
-                                 for i in range(len(spiral)) if not (i % 2)] + \
-                                [(spiral[i][0] + size, spiral[i][1] + size, 1) \
-                                 for i in range(len(spiral)) if (i % 2)]
+                for i in range(size):
+                    training_set.append((spiral[i][0], spiral[i][1], i))
             else:
                 spirals = double_spiral(args.grid_size, args.noise)
                 training_set = [(s[0] + args.grid_size, s[1] + args.grid_size, 0) for s in spirals[0]]\
@@ -129,16 +131,18 @@ def main(parser, args):
         points = [(p[0], p[1]) for p in training_set]
         voronoi = Voronoi(points)
         categories = [p[2] for p in training_set]
-        num_cat = len(list(set(categories)))
+        categories_pure = list(set(categories))
+        num_cat = len(categories_pure)
         # colors_only = [(color[0], color[1], color[2]) for color in cm.rainbow(np.linspace(0,1,len(categories_pure)))]
-        colors = {categories[i]: allcolors[((i + 1) * 41) % len(allcolors)] for i in range(num_cat)}
+        colors = {categories_pure[i]: allcolors[((i + 1) * 41) % len(allcolors)] for i in range(num_cat)}
 
         pl.plot_voronoi(
             voronoi,
             points,
             categories,
             utils.without_column(training_header, args.category),
-            colors
+            colors,
+            show_legend
         )
 
     elif not args.spiral:
