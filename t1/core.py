@@ -43,24 +43,38 @@ def ignore_columns(input_set, training_set, training_header, args):
             args.category -= 1
         del training_header[index]
 
-def mahalanobis(mahalanobis_type, filename):
-    # TODO: show an interactive plot and change the following
-    # variables accordingly. Both should be (x, y) => (r, g, b) dicts
-    training_set, pixels = ic.collect(filename)
+def mahalanobis(mahalanobis_type, filename, args):
+    training_set, pixels, width, height = ic.collect(filename)
 
-    if (len(training_set) == 0):
+    if (not len(training_set) or not len(pixels)):
         print("Error: empty image and/or training set")
         return
 
+    positions = []
+    colors = []
     def process_pixel_distance(position, pixel_color, distance):
         # TODO: do something with distance (e.g color the pixel
         # according to the distance)
-        print(position, " -> distance = ", distance, " (color = ", pixel_color, ")", sep="")
+        positions.append(position)
+        colors.append((int(255 - distance),) * 3)
+
+        # print(position, " -> distance = ", distance, " (color = ", pixel_color, ")", sep="")
 
     if mahalanobis_type == 'linear_mahalanobis':
         cl.linear_mahalanobis(training_set, pixels, process_pixel_distance)
     else:
         cl.quadratic_mahalanobis(training_set, pixels, process_pixel_distance)
+
+    if args.save_image:
+        import imagesaver
+        imagesaver.save(
+            positions=positions,
+            colors=colors,
+            width=width,
+            height=height,
+            path=args.output,
+            show=True
+        )
 
 def main(parser, args):
     is_mahalanobis = (args.distance == 'linear_mahalanobis' or args.distance == 'quadratic_mahalanobis')
@@ -106,7 +120,7 @@ def main(parser, args):
 
     output = []
     if is_mahalanobis:
-        mahalanobis(args.distance, args.input)
+        mahalanobis(args.distance, args.input, args)
     elif args.voronoi:
         from scipy.spatial import Voronoi
         # from matplotlib.pyplot import cm
@@ -207,7 +221,13 @@ def main(parser, args):
 
         if args.save_image:
             import imagesaver
-            imagesaver.save(red_points + blue_points, first + second, neighborhood, args.output)
+            imagesaver.save(
+                positions=red_points + blue_points,
+                colors=first + second,
+                width=neighborhood,
+                height=neighborhood,
+                path=args.output
+            )
 
         if args.plot:
             output = red_points + blue_points

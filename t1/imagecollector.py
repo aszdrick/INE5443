@@ -2,6 +2,13 @@ from tkinter import *
 from PIL import ImageTk, Image
 import numpy as np
 
+def shit_to_dict(pixels, width, height):
+    data = {}
+    for x in range(width):
+        for y in range(height):
+            data[x, y] = pixels[x, y]
+    return data
+
 def collect(path):
     window = Tk()
     source = Image.open(path)
@@ -51,10 +58,7 @@ def collect(path):
 
     window.mainloop()
 
-    data = {}
-    for x in range(width):
-        for y in range(height):
-            data[x, y] = pixels[x, y]
+    return (sample, shit_to_dict(pixels, width, height), width, height)
     # array = np.array(source)
     # data = list(tuple(pixel) for pixel in array)
     # print(width, height)
@@ -62,6 +66,3 @@ def collect(path):
     # print(len(array[0]))
     # print(len(data))
     # print(len(data[0]))
-    return (sample, data)
-
-# print(collect_sample('datasets/flowers.jpg')[0])
