@@ -1,56 +1,55 @@
 from tkinter import *
-# from tkFileDialog import askopenfilename
 from PIL import ImageTk, Image
 
-def _create_circle(self, x, y, r, **kwargs):
-    return self.create_oval(x-r, y-r, x+r, y+r, **kwargs)
-Canvas.create_circle = _create_circle
+def collect(path):
+    window = Tk()
+    source = Image.open(path)
+    pixels = source.load()
+    img = ImageTk.PhotoImage(source)
+    border = 15
 
-root = Tk()
+    width, height = source.size
+    swidth = min(window.winfo_screenwidth(), width + border)
+    sheight = min(window.winfo_screenheight(), height + border)
 
-#setting up a tkinter canvas with scrollbars
-frame = Frame(root, bd=2, relief=SUNKEN)
+    window.maxsize(width=width + border, height=height + border)
+    window.geometry('%dx%d' % (swidth,  sheight))
 
-frame.grid_rowconfigure(0, weight=1)
-frame.grid_columnconfigure(0, weight=1)
+    xscroll = Scrollbar(window, orient=HORIZONTAL)
+    yscroll = Scrollbar(window)
 
-xscroll = Scrollbar(frame, orient=HORIZONTAL)
-yscroll = Scrollbar(frame)
+    yscroll.pack(side=RIGHT, fill=Y)
+    xscroll.pack(side=BOTTOM, fill=X)
 
-xscroll.grid(row=1, column=0, sticky=E+W)
-yscroll.grid(row=0, column=1, sticky=N+S)
+    canvas = Canvas(window, bd=0, xscrollcommand=xscroll.set, yscrollcommand=yscroll.set)
+    
+    xscroll.config(command=canvas.xview)
+    yscroll.config(command=canvas.yview)
 
-canvas = Canvas(frame, bd=0, xscrollcommand=xscroll.set, yscrollcommand=yscroll.set)
-canvas.grid(row=0, column=0, sticky=N+S+E+W)
+    canvas.pack(fill=BOTH, expand=YES)
 
-xscroll.config(command=canvas.xview)
-yscroll.config(command=canvas.yview)
+    canvas.create_image(0, 0, image=img, anchor="nw")
+    canvas.config(scrollregion=canvas.bbox(ALL))
 
-frame.pack(fill=BOTH, expand=1)
+    sample = {}
+    def collect_pixels(event):
+        x = canvas.canvasx(event.x)
+        y = canvas.canvasy(event.y)
 
-#adding the image
-# File = askopenfilename(parent=root, initialdir="C:/",title='Choose an image.')
-file = '/home/aszdrick/Pictures/AREA51.jpg'
+        for i in range(-1, 2):
+            for j in range(-1, 2):
+                nx = x + i
+                ny = y + j
+                if nx >= 0 and nx < width and ny >= 0 and ny < height:
+                    sample[nx, ny] = (pixels[nx, ny])
+        
+        if x >= 0 and x < width and y >= 0 and y < height:
+            canvas.create_rectangle(x - 1, y - 1, x + 1, y + 1, fill='white', outline='white')
 
-source = Image.open(file)
-img = ImageTk.PhotoImage(source)
-# img = PhotoImage(i)
+    canvas.bind("<B1-Motion>", collect_pixels)
 
-canvas.create_image(0, 0, image=img, anchor="nw")
-canvas.config(scrollregion=canvas.bbox(ALL))
+    window.mainloop()
 
-#function to be called when mouse is clicked
-def printcoords(event):
-    x = canvas.canvasx(event.x)
-    y = canvas.canvasy(event.y)
-    #outputting x and y coords to console
-    # print(event.x,event.y)
-    # print(source)
-    canvas.create_rectangle(x - 1, y - 1, x + 1, y + 1, fill='white', outline='white')
-    # canvas.create_circle(event.x, event.y, 1, fill="white", outline="white", width=1)
-    # source[event.x, event.y] = (1,1,1)
+    return (sample, pixels)
 
-canvas.bind("<B1-Motion>", printcoords)
-
-root.geometry('800x600')
-root.mainloop()
+# print(collect_sample('datasets/flowers.jpg')[0])
