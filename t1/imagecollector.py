@@ -1,5 +1,6 @@
 from tkinter import *
 from PIL import ImageTk, Image
+import numpy as np
 
 def collect(path):
     window = Tk()
@@ -50,6 +51,17 @@ def collect(path):
 
     window.mainloop()
 
-    return (sample, pixels)
+    data = {}
+    for x in range(width):
+        for y in range(height):
+            data[x, y] = pixels[x, y]
+    # array = np.array(source)
+    # data = list(tuple(pixel) for pixel in array)
+    # print(width, height)
+    # print(len(array))
+    # print(len(array[0]))
+    # print(len(data))
+    # print(len(data[0]))
+    return (sample, data)
 
 # print(collect_sample('datasets/flowers.jpg')[0])

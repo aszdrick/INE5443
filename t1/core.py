@@ -55,7 +55,7 @@ def mahalanobis(mahalanobis_type, filename):
     def process_pixel_distance(position, pixel_color, distance):
         # TODO: do something with distance (e.g color the pixel
         # according to the distance)
-        print(position, "-> distance =", distance, "(color =", pixel_color, ")")
+        print(position, " -> distance = ", distance, " (color = ", pixel_color, ")", sep="")
 
     if mahalanobis_type == 'linear_mahalanobis':
         cl.linear_mahalanobis(training_set, pixels, process_pixel_distance)

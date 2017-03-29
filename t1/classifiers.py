@@ -2,6 +2,7 @@ import csv
 from math import sqrt
 import numpy as np
 import sys
+import utils
 
 def kNN(dataset, new_data, dfn, c_index=-1, k=1):
     dist = []
@@ -108,7 +109,8 @@ def quadratic_mahalanobis(training_set, pixels, callback):
     rb_sum = 0
     gb_sum = 0
 
-    for (red, green, blue) in training_set:
+    for position in training_set:
+        (red, green, blue) = training_set[position]
         # TODO: is this the right way to calculate the parameters?
         r.append(red)
         g.append(green)
@@ -140,11 +142,19 @@ def quadratic_mahalanobis(training_set, pixels, callback):
     except:
         print("Error: failed to invert the pixel matrix")
         sys.exit(0)
-    for (r, g, b) in pixels:
+
+    distance_map = {}
+    for position in pixels:
+        (r, g, b) = pixels[position]
         pixel = (r, g, b, r * r, g * g, b * b, r * g, r * b, g * b)
-        delta = utils.tuple_difference(prepared_pixel, center)
+        delta = utils.tuple_difference(pixel, center)
         deltaT = np.array([delta]).transpose()
         result = np.dot([delta], Ainv)
         result = np.dot(result, deltaT)
         distance = sqrt(result[0][0])
-        callback(pixel, distance)
+        distance_map[position] = distance
+
+    max_dist = distance_map[max(distance_map)]
+    for position in distance_map:
+        distance = 255 * distance_map[position] / max_dist
+        callback(position, pixels[position], distance)
