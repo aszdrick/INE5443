@@ -3,6 +3,7 @@ from math import floor
 from matplotlib.colors import cnames
 
 import classifiers as cl
+import imagecollector as ic
 import utils
 import plotter as pl
 from spiral import *
@@ -45,10 +46,9 @@ def ignore_columns(input_set, training_set, training_header, args):
 def mahalanobis(mahalanobis_type, filename):
     # TODO: show an interactive plot and change the following
     # variables accordingly. Both should be (x, y) => (r, g, b) dicts
-    training_set = {}
-    pixels = {}
+    training_set, pixels = ic.collect(filename)
 
-    if (len(training_set) == 0 or len(pixels) == 0):
+    if (len(training_set) == 0):
         print("Error: empty image and/or training set")
         return
 
@@ -84,7 +84,7 @@ def main(parser, args):
         training_set = data[1:]
 
     input_set = []
-    if args.input:
+    if not is_mahalanobis and args.input:
         data = utils.load(args.input)
         if not args.training_set:
             training_header = data[0]
