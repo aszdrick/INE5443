@@ -71,13 +71,21 @@ def linear_mahalanobis(training_set, pixels, callback):
     except:
         print("Error: failed to invert the pixel matrix")
         sys.exit(0)
-    for pixel in pixels:
-        delta = utils.tuple_difference(pixel, center)
+
+    distance_map = {}
+    for position in pixels:
+        pixel_color = pixels[position]
+        delta = utils.tuple_difference(pixel_color, center)
         deltaT = np.array([delta]).transpose()
         result = np.dot([delta], Ainv)
         result = np.dot(result, deltaT)
         distance = sqrt(result[0][0])
-        callback(pixel, distance)
+        distance_map[position] = distance
+
+    max_dist = distance_map[max(distance_map)]
+    for position in distance_map:
+        distance = 255 * distance_map[position] / max_dist
+        callback(position, pixels[position], distance)
 
 def quadratic_mahalanobis(training_set, pixels, callback):
     r = []
