@@ -38,6 +38,13 @@ Instructions to execute:
 	Diagram of a double spiral:
 		./voronoi.py --doublespiral grid_size [--noise noise_value]	
 
+3. Mahalanobis distance
+	Linear mahalanobis:
+		./mahalanobis.py -i input_file
+
+	Quadratic mahalanobis:
+		./mahalanobis.py -q -i input_file
+
 ---------------------------------------------
 Instruções para executar:
 
@@ -77,3 +84,10 @@ Instruções para executar:
 
 	Diagrama de uma espiral dupla:
 		./voronoi.py --doublespiral tamanho_do_grid [--noise intensidade_de_noise]
+
+3. Distância de Mahalanobis
+	Mahalanobis linear:
+		./mahalanobis.py -i arquivo_de_entrada
+
+	Mahalanobis quadrático:
+		./mahalanobis.py -q -i arquivo_de_entrada

@@ -43,25 +43,24 @@ def ignore_columns(input_set, training_set, training_header, args):
         del training_header[index]
 
 def mahalanobis(mahalanobis_type, filename):
-    print("Error: mahalanobis not yet implemented");
     # TODO: show an interactive plot and change the following
     # variables accordingly. Both should be (r, g, b) lists
-    # training_set = []
-    # pixels = []
+    training_set = []
+    pixels = []
 
-    # if (len(training_set) == 0 or len(pixels) == 0):
-    #     print("Error: empty image and/or training set")
-    #     return
+    if (len(training_set) == 0 or len(pixels) == 0):
+        print("Error: empty image and/or training set")
+        return
 
-    # def process_pixel_distance(pixel, distance):
-    #     # TODO: do something with distance (e.g color the pixel
-    #     # according to the distance)
-    #     print(pixel, "-> distance =", distance)
+    def process_pixel_distance(pixel, distance):
+        # TODO: do something with distance (e.g color the pixel
+        # according to the distance)
+        print(pixel, "-> distance =", distance)
 
-    # if mahalanobis_type == 'linear_mahalanobis':
-    #     cl.linear_mahalanobis(training_set, pixels, process_pixel_distance)
-    # else:
-    #     cl.quadratic_mahalanobis(training_set, pixels, process_pixel_distance)
+    if mahalanobis_type == 'linear_mahalanobis':
+        cl.linear_mahalanobis(training_set, pixels, process_pixel_distance)
+    else:
+        cl.quadratic_mahalanobis(training_set, pixels, process_pixel_distance)
 
 def main(parser, args):
     is_mahalanobis = (args.distance == 'linear_mahalanobis' or args.distance == 'quadratic_mahalanobis')
