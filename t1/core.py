@@ -53,17 +53,39 @@ def mahalanobis(mahalanobis_type, filename, args):
     positions = []
     colors = []
     def process_pixel_distance(position, pixel_color, distance):
-        # TODO: do something with distance (e.g color the pixel
-        # according to the distance)
         positions.append(position)
-        colors.append((int(255 - distance),) * 3)
-
-        # print(position, " -> distance = ", distance, " (color = ", pixel_color, ")", sep="")
+        colors.append((int(distance),) * 3)
 
     if mahalanobis_type == 'linear_mahalanobis':
         cl.linear_mahalanobis(training_set, pixels, process_pixel_distance)
     else:
         cl.quadratic_mahalanobis(training_set, pixels, process_pixel_distance)
+
+    if args.save_image:
+        import imagesaver
+        imagesaver.save(
+            positions=positions,
+            colors=colors,
+            width=width,
+            height=height,
+            path=args.output,
+            show=True
+        )
+
+def l2norm(filename, args):
+    training_set, pixels, width, height = ic.collect(filename)
+
+    if (not len(training_set) or not len(pixels)):
+        print("Error: empty image and/or training set")
+        return
+
+    positions = []
+    colors = []
+    def process_pixel_distance(position, pixel_color, distance):
+        positions.append(position)
+        colors.append((int(distance),) * 3)
+
+    cl.l2norm(training_set, pixels, process_pixel_distance)
 
     if args.save_image:
         import imagesaver

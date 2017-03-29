@@ -86,7 +86,7 @@ def linear_mahalanobis(training_set, pixels, callback):
 
     max_dist = distance_map[max(distance_map)]
     for position in distance_map:
-        distance = 255 * distance_map[position] / max_dist
+        distance = 255 * (1 - distance_map[position] / max_dist)
         callback(position, pixels[position], distance)
 
 def quadratic_mahalanobis(training_set, pixels, callback):
@@ -156,5 +156,43 @@ def quadratic_mahalanobis(training_set, pixels, callback):
 
     max_dist = distance_map[max(distance_map)]
     for position in distance_map:
-        distance = 255 * distance_map[position] / max_dist
+        distance = 255 * (1 - distance_map[position] / max_dist)
+        callback(position, pixels[position], distance)
+
+
+def linear_mahalanobis(training_set, pixels, callback):
+    r = []
+    g = []
+    b = []
+    r_sum = 0
+    g_sum = 0
+    b_sum = 0
+
+    for position in training_set:
+        (red, green, blue) = training_set[position]
+        r.append(red)
+        g.append(green)
+        b.append(blue)
+
+        r_sum += red
+        g_sum += green
+        b_sum += blue
+
+    # TODO: finish this
+    size = len(training_set)
+    center = (r_sum / size, g_sum / size, b_sum / size)
+
+    distance_map = {}
+    for position in pixels:
+        pixel_color = pixels[position]
+        delta = utils.tuple_difference(pixel_color, center)
+        deltaT = np.array([delta]).transpose()
+        result = np.dot([delta], Ainv)
+        result = np.dot(result, deltaT)
+        distance = sqrt(result[0][0])
+        distance_map[position] = distance
+
+    max_dist = distance_map[max(distance_map)]
+    for position in distance_map:
+        distance = 255 * (1 - distance_map[position] / max_dist)
         callback(position, pixels[position], distance)
