@@ -54,7 +54,8 @@ def linear_mahalanobis(training_set, pixels, callback):
     g_sum = 0
     b_sum = 0
 
-    for (red, green, blue) in training_set:
+    for position in training_set:
+        (red, green, blue) = training_set[position]
         r.append(red)
         g.append(green)
         b.append(blue)
