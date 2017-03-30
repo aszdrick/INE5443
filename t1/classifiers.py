@@ -159,37 +159,24 @@ def quadratic_mahalanobis(training_set, pixels, callback):
         distance = 255 * (1 - distance_map[position] / max_dist)
         callback(position, pixels[position], distance)
 
-
-def linear_mahalanobis(training_set, pixels, callback):
-    r = []
-    g = []
-    b = []
+def l2norm(training_set, pixels, callback):
     r_sum = 0
     g_sum = 0
     b_sum = 0
 
     for position in training_set:
         (red, green, blue) = training_set[position]
-        r.append(red)
-        g.append(green)
-        b.append(blue)
-
         r_sum += red
         g_sum += green
         b_sum += blue
 
-    # TODO: finish this
     size = len(training_set)
     center = (r_sum / size, g_sum / size, b_sum / size)
 
     distance_map = {}
     for position in pixels:
         pixel_color = pixels[position]
-        delta = utils.tuple_difference(pixel_color, center)
-        deltaT = np.array([delta]).transpose()
-        result = np.dot([delta], Ainv)
-        result = np.dot(result, deltaT)
-        distance = sqrt(result[0][0])
+        distance = euclidian_dist(pixel_color, center)
         distance_map[position] = distance
 
     max_dist = distance_map[max(distance_map)]
