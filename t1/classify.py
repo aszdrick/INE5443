@@ -21,6 +21,7 @@ parser.add_argument('-p', '--plot', action='store_true', help='Plot the classifi
 parser.add_argument('-l', '--slice', type=float, help='Automatically pick the given approximate percentage of the input set to use as the training set')
 parser.add_argument('-S', '--save_image', action='store_true', help='Save the resulting spiral as an image')
 parser.add_argument('-V', '--voronoi', action='store_true', help='Plot the corresponding voronoi diagram')
+parser.add_argument("-C", "--compare", nargs='+', choices=['l2norm', 'quadratic_mahalanobis', 'linear_mahalanobis'], help="Compare with other algorithms")
 
 args = parser.parse_args()
 main(parser, args)

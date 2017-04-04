@@ -7,6 +7,7 @@ parser = argparse.ArgumentParser(description="Applies the L2-norm to a given ima
 
 parser.add_argument("-i", "--input", required=True, type=str, help="Filename of the base image")
 parser.add_argument("-o", "--output", type=str, help="Output file")
+parser.add_argument("-c", "--compare", nargs='+', choices=['l2norm', 'quadratic_mahalanobis', 'linear_mahalanobis'], help="Compare with other algorithms")
 
 args = parser.parse_args()
 
