@@ -62,7 +62,6 @@ def plot_voronoi(voronoi, training_set, categories, axis_labels, colors, show_le
         for cat in colors:
             mc.append(mpatches.Patch(color=colors[cat]))
 
-        # handles = [mt] + mc
         handles = mc
         plt.legend(
             handles,

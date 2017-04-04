@@ -111,7 +111,6 @@ def quadratic_mahalanobis(training_set, pixels, callback):
 
     for position in training_set:
         (red, green, blue) = training_set[position]
-        # TODO: is this the right way to calculate the parameters?
         r.append(red)
         g.append(green)
         b.append(blue)

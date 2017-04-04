@@ -42,10 +42,30 @@ The list of dependencies can be found at: dependencias.txt
 
 3. Mahalanobis distance
 	Linear mahalanobis:
-		python3 mahalanobis.py -i input_file
+		python3 mahalanobis.py -i input_file -o output_file
 
 	Quadratic mahalanobis:
-		python3 mahalanobis.py -q -i input_file
+		python3 mahalanobis.py -q -i input_file -o output_file
+
+	L2norm (euclidean distance):
+		python3 l2norm.py -i input_file -o output_file
+
+	Comparison between L2norm and/or mahalanobis distance:
+		python3 mahalanobis.py -i input_file -o output_file -c alg1 alg2
+		OR
+		python3 l2norm.py -i input_file -o output_file -c alg1 alg2
+	where "alg1" and "alg2" are the algorithms to be compared. It's possible to specify a third algorithm as well. Possible algorithms are:
+		l2norm
+		linear_mahalanobis
+		quadratic_mahalanobis
+	each result will be saved to the target output file with the algorithm name appended to it. For example, consider the following command:
+		python3 mahalanobis.py -i datasets/flowers.jpg -o output -c l2norm linear_mahalanobis quadratic_mahalanobis
+	after finishing execution, the program will display and save three image files:
+		output_l2norm
+		output_linear_mahalanobis
+		output_quadratic_mahalanobis
+
+	After executing any of the commands above, the input iamge will be presented to the user. The user then chooses the desired pixels by dragging the mouse cursor over the image and then closes it. The resulting image(s) will then be displayed and saved.
 
 ---------------------------------------------
 Instruções para executar:
@@ -91,7 +111,27 @@ A lista de dependências encontra-se em: dependencias.txt
 
 3. Distância de Mahalanobis
 	Mahalanobis linear:
-		python3 mahalanobis.py -i arquivo_de_entrada
+		python3 mahalanobis.py -i arquivo_de_entrada -o arquivo_de_saida
 
 	Mahalanobis quadrático:
-		python3 mahalanobis.py -q -i arquivo_de_entrada
+		python3 mahalanobis.py -q -i arquivo_de_entrada -o arquivo_de_saida
+
+	L2norm (distância euclidiana):
+		python3 l2norm.py -i arquivo_de_entrada -o arquivo_de_saida
+
+	Comparação entre L2norm e/ou distância de mahalanobis:
+		python3 mahalanobis.py -i arquivo_de_entrada -o arquivo_de_saida -c alg1 alg2
+		OU
+		python3 l2norm.py -i arquivo_de_entrada -o arquivo_de_saida -c alg1 alg2
+	onde "alg1" e "alg2" são os algoritmos a serem comparados. Também é possível especificar um terceiro algoritmo. Os possíveis algoritmos são:
+		l2norm
+		linear_mahalanobis
+		quadratic_mahalanobis
+	cada resultado será salvo ao arquivo de saída alvo com o nome de cada algoritmo concatenado a ele. Por exemplo, considere o seguinte comando:
+		python3 mahalanobis.py -i datasets/flowers.jpg -o output -c l2norm linear_mahalanobis quadratic_mahalanobis
+	após o término da execução, o programa exibirá e salvará três arquivos de imagem:
+		output_l2norm
+		output_linear_mahalanobis
+		output_quadratic_mahalanobis
+
+	Após executar qualquer um dos comandos acima, a imagem de entrada será apresentada ao usuário. O usuário então escolhe os pixels desejados arrastando o clique do mouse sobre a imagem e então a fecha. A(s) imagem(ns) resultante(s) será(ão) então exibida(s) e salva(s).

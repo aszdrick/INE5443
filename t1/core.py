@@ -61,6 +61,7 @@ def process_image_distances(filename, args, callbacks):
     for callback in callbacks:
         callback(training_set, pixels, process_pixel_distance)
 
+        print("Displaying the resulting image for " + args.compare[i])
         imagesaver.show(
             positions=positions,
             colors=colors,
@@ -73,17 +74,6 @@ def process_image_distances(filename, args, callbacks):
 
 def main(parser, args):
     is_mahalanobis = (args.distance == 'linear_mahalanobis' or args.distance == 'quadratic_mahalanobis')
-    # if not args.output or\
-    #   (not args.spiral and not is_mahalanobis and args.category == None) or\
-    #   (not args.spiral and not args.input) or\
-    #   (not args.spiral and args.noise) or\
-    #   (args.spiral and (args.training_set or args.input)) or\
-    #   (args.spiral and not args.grid_size) or\
-    #   (not args.voronoi and not is_mahalanobis and args.input and not args.training_set and not args.slice) or\
-    #   (args.training_set and args.slice):
-
-    #    parser.print_help()
-    #    sys.exit(0)
 
     try:
         training_header = []
@@ -138,7 +128,6 @@ def main(parser, args):
 
         elif args.voronoi:
             from scipy.spatial import Voronoi
-            # from matplotlib.pyplot import cm
             show_legend = True
             if args.spiral:
                 args.category = 2
@@ -162,7 +151,6 @@ def main(parser, args):
             categories = [p[2] for p in training_set]
             categories_pure = list(set(categories))
             num_cat = len(categories_pure)
-            # colors_only = [(color[0], color[1], color[2]) for color in cm.rainbow(np.linspace(0,1,len(categories_pure)))]
             colors = {categories_pure[i]: allcolors[((i + 1) * 41) % len(allcolors)] for i in range(num_cat)}
 
             pl.plot_voronoi(

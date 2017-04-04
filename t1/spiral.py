@@ -30,8 +30,3 @@ def double_spiral(grid_size, noise = 0):
 		yn = x * sin + y * cos
 		result.append((xn, yn))
 	return [single_spiral(grid_size, noise), result]
-
-# data = double_spiral(400)
-# plt.scatter([tp[0] for tp in data[0]], [tp[1] for tp in data[0]], color="r")
-# plt.scatter([tp[0] for tp in data[1]], [tp[1] for tp in data[1]], color="b")
-# plt.show()
