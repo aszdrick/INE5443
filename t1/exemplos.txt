@@ -1,0 +1,27 @@
+generoIris:
+	python3 classify.py -i datasets/generoIris.csv -l 50 -o output.csv -c 4 -v 
+	python3 classify.py -i datasets/generoIris.csv -l 50 -o output.csv -c 4 -k 3 -v
+
+generoIris2D:
+	python3 classify.py -i datasets/generoIris2D.csv -l 50 -o output.csv -c 2 -v
+	python3 classify.py -i datasets/generoIris2D.csv -l 50 -o output.csv -c 2 -v -p
+	python3 classify.py -i datpython3 voronoi.py -i datasets/generoIris2D.csv -c 2
+	python3 voronoi.py -i datasets/generoIris2D.csv -c 2
+
+german_credit:
+	python3 classify.py -i datasets/german_credit.csv -l 50 -o output.csv -c 1 -v -I 0
+	python3 classify.py -i datasets/german_credit.csv -l 50 -o output.csv -c 1 -v -I 0 -k 5
+
+flowers:
+	python3 mahalanobis.py -i datasets/flowers.jpg -o output -c l2norm linear_mahalanobis quadratic_mahalanobis
+
+starfish:
+	python3 mahalanobis.py -i datasets/starfish.jpg -o output -c l2norm linear_mahalanobis quadratic_mahalanobis
+
+spirals:
+	python3 classify.py -s single -o output -g 50 -S
+	python3 classify.py -s double -o output -g 100 -S
+	python3 voronoi.py -s 100
+	python3 voronoi.py -s 100 -n 5
+	python3 voronoi.py -d 100
+	python3 voronoi.py -d 100 -n 5

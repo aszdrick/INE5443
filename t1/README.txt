@@ -1,6 +1,7 @@
 Instructions to execute:
 
 The list of dependencies can be found at: dependencias.txt
+Some example commands can be found at: exemplos.txt
 
 1. kNN classifier
 	Basic, with automatic testing/training division:
@@ -71,6 +72,7 @@ The list of dependencies can be found at: dependencias.txt
 Instruções para executar:
 
 A lista de dependências encontra-se em: dependencias.txt
+Alguns exemplos de comandos podem ser encontrados em: exemplos.txt
 
 1. Classificador kNN
 	Básico, com divisão automática entre treinamento e teste:
