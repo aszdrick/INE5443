@@ -1,6 +1,5 @@
 import csv
 from math import sqrt
-import math
 import numpy as np
 import sys
 import utils
@@ -37,9 +36,11 @@ def euclidian_dist(v1, v2):
     return np.sqrt(np.sum((np.array(v1) - np.array(v2)) ** 2))
 
 class Classifier:
-    hits = 0
-    fails = 0
-    descriptor = []
+    def __init__(self):
+        self.hits = 0
+        self.fails = 0
+        self.descriptor = []
+
     def classify(self, entry, class_index=-1):
         max_similarity = -math.inf
         best_entry = None
@@ -54,48 +55,54 @@ class Classifier:
         self.descriptor.append(self.pick_one(training_set))
 
     def pick_one(self, array):
-        return array[round(np.random.uniform(0, len(array)))]
+        return array[round(np.random.uniform(0, len(array) - 1))]
 
 class IBL1(Classifier):
     def __init__(self, training_set, class_index=-1):
-        if len(descriptor) == 0:
+        super(IBL1, self).__init__()
+        if len(self.descriptor) == 0:
             self.add_random_entry(training_set)
 
-        max_similarity = -math.inf
-        best_entries = []
         for external_entry in training_set:
+            max_similarity = -float("inf")
+            best_entries = []
             for internal_entry in self.descriptor:
-                similarity = -euclidian_dist(external_entry, internal_entry)
+                prepared_external_entry = utils.without_column(external_entry, class_index)
+                prepared_internal_entry = utils.without_column(internal_entry, class_index)
+                similarity = -euclidian_dist(prepared_external_entry, prepared_internal_entry)
                 if similarity > max_similarity:
                     max_similarity = similarity
                     best_entries = [internal_entry]
                 elif similarity == max_similarity:
                     best_entries.append(internal_entry)
             best_entry = self.pick_one(best_entries)
-            if internal_entry[class_index] == best_entry[class_index]:
+            if external_entry[class_index] == best_entry[class_index]:
                 self.hits += 1
             else:
                 self.fails += 1
-            descriptor.append(external_entry)
+            self.descriptor.append(external_entry)
 
 class IBL2(Classifier):
     def __init__(self, training_set, class_index=-1):
-        if len(descriptor) == 0:
+        super(IBL2, self).__init__()
+        if len(self.descriptor) == 0:
             self.add_random_entry(training_set)
 
-        max_similarity = -math.inf
-        best_entries = []
         for external_entry in training_set:
+            max_similarity = -float("inf")
+            best_entries = []
             for internal_entry in self.descriptor:
-                similarity = -euclidian_dist(external_entry, internal_entry)
+                prepared_external_entry = utils.without_column(external_entry, class_index)
+                prepared_internal_entry = utils.without_column(internal_entry, class_index)
+                similarity = -euclidian_dist(prepared_external_entry, prepared_internal_entry)
                 if similarity > max_similarity:
                     max_similarity = similarity
                     best_entries = [internal_entry]
                 elif similarity == max_similarity:
                     best_entries.append(internal_entry)
             best_entry = self.pick_one(best_entries)
-            if internal_entry[class_index] == best_entry[class_index]:
+            if external_entry[class_index] == best_entry[class_index]:
                 self.hits += 1
             else:
                 self.fails += 1
-                descriptor.append(external_entry)
+                self.descriptor.append(external_entry)
