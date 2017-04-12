@@ -106,3 +106,56 @@ class IBL2(Classifier):
             else:
                 self.fails += 1
                 self.descriptor.append(external_entry)
+
+class IBL3(Classifier):
+    def __init__(self, training_set, class_index=-1):
+        super(IBL3, self).__init__()
+
+        for external_entry in training_set:
+            similarity_list = {}
+            acceptable_list = []
+            best_acceptable_similarity = -float("inf")
+            best_acceptables = []
+            i = 0
+            for internal_entry in self.descriptor:
+                prepared_external_entry = utils.without_column(external_entry, class_index)
+                prepared_internal_entry = utils.without_column(internal_entry, class_index)
+                similarity = -euclidian_dist(prepared_external_entry, prepared_internal_entry)
+                similarity_list[i] = similarity
+                if (self.acceptable(internal_entry)):
+                    acceptable_list.append(internal_entry)
+                    if similarity > best_acceptable_similarity:
+                        best_acceptable_similarity = similarity
+                        best_acceptable = [internal_entry]
+                    elif similarity == best_acceptable_similarity:
+                        best_acceptables.append(internal_entry)
+                i += 1
+
+            best_entry = None
+            if (len(acceptable_list) > 0):
+                best_entry = self.pick_one(best_acceptables)
+            else:
+                # TODO
+                pass
+
+            # best_entry is still None if len(self.descriptor) == 0
+            if best_entry and \
+               external_entry[class_index] == best_entry[class_index]:
+                self.hits += 1
+            else:
+                self.fails += 1
+                self.descriptor.append(external_entry)
+
+            j = 0
+            for internal_entry in self.descriptor:
+                if similarity_list[j] >= similarity_list[best_entry]:
+                    # TODO
+                    pass
+                j += 1
+
+
+    def frequency_interval(self, p, z, n):
+        d = (1 + (z * z) / n)
+        f1 = p + (z * z) / (2 * n)
+        f2 = z * math.sqrt(p * (1 - p) / n + (z * z) / (4 * n * n))
+        return [(f1 - f2) / d, (f1 + f2) / d]
