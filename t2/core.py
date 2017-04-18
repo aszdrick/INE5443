@@ -10,38 +10,23 @@ from spiral import *
 
 allcolors = [color for color in sorted(cnames)]
 
-def slice_data(input_set, slice_percentage):
-    num_picked_entries = floor(len(input_set) * slice_percentage / 100)
-    num_entries = len(input_set)
+def split_data(data, percentage):
+    num_picked_entries = floor(len(data) * percentage / 100)
+    num_entries = len(data)
     i = 0
-    training_set = []
+    second_part = []
     picked_indexes = set()
-    while len(training_set) < num_picked_entries:
+    while len(second_part) < num_picked_entries:
         if i >= num_entries:
             i = 1
-        training_set.append(input_set[i])
+        second_part.append(data[i])
         picked_indexes.add(i)
         i += 2
 
     for i in range(num_entries - 1, -1, -1):
         if i in picked_indexes:
-            del input_set[i]
-    return training_set
-
-def ignore_columns(input_set, training_set, training_header, args):
-    args.ignore.sort(reverse=True)
-    for entry in training_set:
-        for index in args.ignore:
-            del entry[index]
-
-    for entry in input_set:
-        for index in args.ignore:
-            del entry[index]
-
-    for index in args.ignore:
-        if index < args.category:
-            args.category -= 1
-        del training_header[index]
+            del data[i]
+    return second_part
 
 def main(parser, args):
     try:
