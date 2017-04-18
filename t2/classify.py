@@ -40,7 +40,6 @@ spiral.add_argument("-o", "--output", type=str, default="out", metavar="FILE", h
 
 def process_dataset(args):
     training_header, training_set = utils.load_csv(args.input)
-    del training_set[0]
     if len(training_set) == 0:
         dataset.error("Invalid input: file does not exist or is empty.")
     
