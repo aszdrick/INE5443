@@ -8,6 +8,8 @@ def normalize(value):
         return value
 
 def save_csv(filename, dataset):
+    if filename[-4:] != ".csv":
+        filename += ".csv"
     with open(filename, "w") as file:
         writer = csv.writer(file, delimiter=',',
                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -15,6 +17,8 @@ def save_csv(filename, dataset):
             writer.writerow(row)
 
 def load_csv(filename):
+    if filename[-4:] != ".csv":
+        filename += ".csv"
     rows = []
     if os.path.isfile(filename):
         with open(filename, "r", newline='') as file:

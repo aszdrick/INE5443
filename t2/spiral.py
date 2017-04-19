@@ -7,11 +7,11 @@ def apply_noise(point, noise):
     return (point[0] + random.uniform(-noise, noise),\
             point[1] + random.uniform(-noise, noise))
 
-def single_spiral(grid_size, noise = 0, arc = 5, separation = 15):
+def single_spiral(grid_size, noise = 0, distance = 5, separation = 15):
     half_size = (grid_size / 2)
     p2c = lambda r, phi: (r * math.cos(phi), r * math.sin(phi))
 
-    r = arc
+    r = distance
     b = (separation) / (2 * math.pi)
     phi = r / b
     
@@ -22,7 +22,7 @@ def single_spiral(grid_size, noise = 0, arc = 5, separation = 15):
         points.append(point)
         point = apply_noise(p2c(r, phi), noise)
 
-        phi += arc / r
+        phi += distance / r
         r = b * phi
 
     return points
