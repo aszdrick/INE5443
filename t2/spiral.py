@@ -3,6 +3,10 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
+def apply_noise(point, noise):
+    return (point[0] + random.uniform(-noise, noise),\
+            point[1] + random.uniform(-noise, noise))
+
 def single_spiral(grid_size, noise = 0, arc = 5, separation = 15):
     half_size = (grid_size / 2)
     p2c = lambda r, phi: (r * math.cos(phi), r * math.sin(phi))
@@ -12,11 +16,12 @@ def single_spiral(grid_size, noise = 0, arc = 5, separation = 15):
     phi = r / b
     
     points = []
-    point = p2c(r, phi)
+    point = apply_noise(p2c(r, phi), noise)
     
     while abs(point[0]) <= half_size and abs(point[1]) <= half_size:
         points.append(point)
-        point = p2c(r, phi)
+        point = apply_noise(p2c(r, phi), noise)
+
         phi += arc / r
         r = b * phi
 
@@ -48,4 +53,4 @@ def double_spiral(grid_size, noise = 0):
         xn = x * cos - y * sin
         yn = x * sin + y * cos
         result.append((xn, yn))
-    return [single_spiral(grid_size), result]
+    return [single_spiral(grid_size, noise), result]
