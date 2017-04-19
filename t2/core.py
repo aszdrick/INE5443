@@ -1,3 +1,4 @@
+import itertools
 import sys
 from math import floor
 from matplotlib.colors import cnames
@@ -9,7 +10,26 @@ import plotter as pl
 from spiral import *
 import utils
 
-allcolors = [color for color in sorted(cnames)]
+# allcolors = [color for color in sorted(cnames)]
+allcolors = [color for key, color in sorted(cnames.items())]
+
+def process_spiral(spiral_type, size, noise):
+    data_size = 2 * size + 50
+    spiral = []
+    remove = set()
+    if spiral_type == "single":
+        color = lambda i: allcolors[((i + 1) * 41) % len(allcolors)]
+        s = single_spiral(size, noise)
+        remove = set(s)
+        spiral = [(s[i][0] + size, s[i][1] + size, color(i)) for i in range(len(s))] 
+    else:
+        s = double_spiral(size, noise)
+        remove = set(s[0]) | set(s[1])
+        spiral = [(s[0][i][0] + size, s[0][i][1] + size, "#FF0000") for i in range(len(s[0]))]
+        spiral += [(s[1][i][0] + size, s[1][i][1] + size, "#0000FF") for i in range(len(s[1]))]
+    data = set(itertools.permutations(range(data_size), 2)) - remove
+    data = [(t[0], t[1], None) for t in data]
+    return (["x", "y", "color"], spiral, data, data_size)
 
 def test(classifier, test_set, **kargs):
     hits = 0

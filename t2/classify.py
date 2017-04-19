@@ -45,4 +45,4 @@ if __name__ == "__main__":
 
         output = core.IBL(header, training_set, test_set, data, **params)
     else:
-        print("spiral")
+        header, training_set, data, size = core.process_spiral(args.spiral_type, args.grid_size, args.noise)

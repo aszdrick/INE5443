@@ -27,7 +27,7 @@ dataset.add_argument("-I", "--ignore", nargs="+", type=int, metavar="INDEX", hel
 #image = dataparsers.add_parser("image", help="Classify a given image")
 
 spiral = dataparsers.add_parser("spiral", help="Classify a given spiral")
-spiral.add_argument("-t", "--type", type=str, choices=["single", "double"], default="single", help="Type of spiral")
+spiral.add_argument("-t", "--spiral_type", type=str, choices=["single", "double"], default="single", help="Type of spiral")
 spiral.add_argument("-g", "--grid_size", type=int, default=50, help="Grid size to generate spiral (default 50)")
 spiral.add_argument("-n", "--noise", type=int, default=0, help="Noise for the spiral.")
 spiral.add_argument("-o", "--output", type=str, default="out", metavar="FILE", help="Save classified data as <FILE>.png")
