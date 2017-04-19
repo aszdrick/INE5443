@@ -11,7 +11,7 @@ import utils
 
 allcolors = [color for color in sorted(cnames)]
 
-def test(classifier, header, test_set, **kargs):
+def test(classifier, test_set, **kargs):
     hits = 0
     fails = 0
     for entry in test_set:
@@ -28,17 +28,15 @@ def test(classifier, header, test_set, **kargs):
     print("Fails: %i" % (fails))
     print("Precision: %f%%" % (100 * hits / (hits + fails)))
 
-def classify(classifier, header, data, **kargs):
+def classify(classifier, data, **kargs):
     output = []
     for entry in data:
         chosen = classifier.classify(entry, kargs["category"])
         entry[kargs["category"]] = chosen
         output.append(entry)
+    return output;
 
-    if kargs["output"]:
-        utils.save_csv(kargs["output"], output);
-
-def IBL(header, training_set, test_set, data, **kargs):
+def IBL(training_set, test_set, data, **kargs):
     algorithms = {
         "IB1": IBL1,
         "IB2": IBL2
@@ -51,10 +49,12 @@ def IBL(header, training_set, test_set, data, **kargs):
     print("Precision: %f%%" % (100 * classifier.hits / (classifier.hits + classifier.fails)))
 
     if test_set:
-        test(classifier, header, test_set, **kargs)
+        test(classifier, test_set, **kargs)
 
     if data:
-        classify(classifier, header, data, **kargs)
+        return classify(classifier, data, **kargs)
+
+    return []
 
 def split_data(data, percentage):
     num_picked_entries = floor(len(data) * percentage / 100)
