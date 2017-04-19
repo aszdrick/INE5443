@@ -32,7 +32,7 @@ def process_spiral(spiral_type, size, noise):
         color = lambda i: allcolors[((i + 1) * 41) % len(allcolors)]
         s = single_spiral(size, noise)
         remove = set(s)
-        spiral = [(s[i][0], s[i][1], color(i)) for i in range(len(s))] 
+        spiral = [(s[i][0] + half, s[i][1] + half, color(i)) for i in range(len(s))]
     else:
         s = double_spiral(size, noise)
         remove = set(s[0]) | set(s[1])
@@ -42,9 +42,7 @@ def process_spiral(spiral_type, size, noise):
     data = set(itertools.product(range(size), repeat=2)) - remove
     data = [[t[0], t[1], None] for t in data]
 
-    x = (["x", "y", "color"], sorted(spiral), sorted(data), size)
-    print("process complete")
-    return x
+    return (["x", "y", "color"], sorted(spiral), sorted(data), size)
 
 def test(classifier, test_set, **kargs):
     hits = 0
@@ -77,7 +75,7 @@ def IBL(training_set, test_set, data, **kargs):
         "IB1": IBL1,
         "IB2": IBL2
     }
-    print("preparing to train")
+
     classifier = algorithms[kargs["algorithm"]](training_set, kargs["category"])
 
     print("Training statistics:")
