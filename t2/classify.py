@@ -38,11 +38,15 @@ if __name__ == "__main__":
         header, training_set, test_set, data = process_dataset(args)
         params = {
             "algorithm": args.algorithm,
-            "category": args.category,
-            "output": args.output,
-            "verbose": None,
+            "category": args.category
         }
 
-        output = core.IBL(header, training_set, test_set, data, **params)
     else:
         header, training_set, data, size = core.process_spiral(args.spiral_type, args.grid_size, args.noise)
+        test_set = []
+        params = {
+            "algorithm": args.algorithm,
+            "category": 2
+        }
+
+    output = core.IBL(training_set, test_set, data, **params)
