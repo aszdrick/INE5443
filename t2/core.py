@@ -14,22 +14,24 @@ import utils
 allcolors = [color for key, color in sorted(cnames.items())]
 
 def process_spiral(spiral_type, size, noise):
-    data_size = 2 * size + 50
+    half = size / 2
     spiral = []
     remove = set()
     if spiral_type == "single":
         color = lambda i: allcolors[((i + 1) * 41) % len(allcolors)]
         s = single_spiral(size, noise)
         remove = set(s)
-        spiral = [(s[i][0] + size, s[i][1] + size, color(i)) for i in range(len(s))] 
+        spiral = [(s[i][0], s[i][1], color(i)) for i in range(len(s))] 
     else:
         s = double_spiral(size, noise)
         remove = set(s[0]) | set(s[1])
-        spiral = [(s[0][i][0] + size, s[0][i][1] + size, "#FF0000") for i in range(len(s[0]))]
-        spiral += [(s[1][i][0] + size, s[1][i][1] + size, "#0000FF") for i in range(len(s[1]))]
-    data = set(itertools.product(range(data_size), repeat=2)) - remove
+        spiral = [(s[0][i][0] + half, s[0][i][1] + half, "#FF0000") for i in range(len(s[0]))]
+        spiral += [(s[1][i][0] + half, s[1][i][1] + half, "#0000FF") for i in range(len(s[1]))]
+
+    data = set(itertools.product(range(size), repeat=2)) - remove
     data = [[t[0], t[1], None] for t in data]
-    return (["x", "y", "color"], sorted(spiral), sorted(data), data_size)
+
+    return (["x", "y", "color"], sorted(spiral), sorted(data), size)
 
 def test(classifier, test_set, **kargs):
     hits = 0

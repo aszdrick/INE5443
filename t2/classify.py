@@ -51,6 +51,15 @@ if __name__ == "__main__":
         output = core.IBL(training_set, test_set, data, **params)
         import image
         image.save(
+            positions=[(x[0], x[1]) for x in training_set],
+            colors=[utils.hex_to_tuple(x[2]) for x in training_set],
+            width=size,
+            height=size,
+            path=args.output + "_original.png",
+            show=args.show
+        )
+
+        image.save(
             positions=[(x[0], x[1]) for x in output],
             colors=[utils.hex_to_tuple(x[2]) for x in output],
             width=size,
