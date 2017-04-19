@@ -40,7 +40,7 @@ if __name__ == "__main__":
             "algorithm": args.algorithm,
             "category": args.category
         }
-
+        output = core.IBL(training_set, test_set, data, **params)
     else:
         header, training_set, data, size = core.process_spiral(args.spiral_type, args.grid_size, args.noise)
         test_set = []
@@ -48,5 +48,13 @@ if __name__ == "__main__":
             "algorithm": args.algorithm,
             "category": 2
         }
-
-    output = core.IBL(training_set, test_set, data, **params)
+        output = core.IBL(training_set, test_set, data, **params)
+        import image
+        image.save(
+            positions=[(x[0], x[1]) for x in output],
+            colors=[utils.hex_to_tuple(x[2]) for x in output],
+            width=size,
+            height=size,
+            path=args.output + ".png",
+            show=args.show
+        )

@@ -5,7 +5,7 @@ from matplotlib.colors import cnames
 
 import classifiers as cl
 from IBL import *
-import imagecollector as ic
+import image as ic
 import plotter as pl
 from spiral import *
 import utils
@@ -181,14 +181,14 @@ def main(parser, args):
 
             if args.save_image:
                 import imagesaver
-                imagesaver.show(
-                    positions=red_points + blue_points,
-                    colors=first + second,
-                    width=neighborhood,
-                    height=neighborhood,
-                    path=args.output,
-                    save=True
-                )
+                # imagesaver.show(
+                #     positions=red_points + blue_points,
+                #     colors=first + second,
+                #     width=neighborhood,
+                #     height=neighborhood,
+                #     path=args.output,
+                #     save=True
+                # )
 
             if args.plot:
                 output = red_points + blue_points

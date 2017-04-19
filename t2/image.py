@@ -2,7 +2,19 @@ from tkinter import *
 from PIL import ImageTk, Image
 import numpy as np
 
-def shit_to_dict(pixels, width, height):
+def save(path, positions, colors, width, height, show=False):
+    im = Image.new('RGB', (width, height))
+    pixels = im.load()
+    for i in range(len(positions)):
+        pos = positions[i]
+        pixels[pos[0], pos[1]] = colors[i]
+
+    im.save(path, "PNG")
+
+    if show:
+        im.show()
+
+def pixels_to_dict(pixels, width, height):
     data = {}
     for x in range(width):
         for y in range(height):
@@ -58,11 +70,4 @@ def collect(path):
 
     window.mainloop()
 
-    return (sample, shit_to_dict(pixels, width, height), width, height)
-    # array = np.array(source)
-    # data = list(tuple(pixel) for pixel in array)
-    # print(width, height)
-    # print(len(array))
-    # print(len(array[0]))
-    # print(len(data))
-    # print(len(data[0]))
+    return (sample, pixels_to_dict(pixels, width, height), width, height)

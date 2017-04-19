@@ -42,3 +42,7 @@ def tuple_difference(first, second):
     for i in range(len(first)):
         result += (first[i] - second[i],)
     return result
+
+def hex_to_tuple(rgb):
+    rgb = rgb[1:]
+    return (int(rgb[:2], 16), int(rgb[2:4], 16), int(rgb[4:], 16))
