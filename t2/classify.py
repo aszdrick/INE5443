@@ -72,7 +72,12 @@ if __name__ == "__main__":
         header, training_set, test_set, data = process_dataset(args)
         params = {
             "algorithm": args.algorithm,
+            "category": args.category,
+            "output": args.output,
+            "verbose": args.verbose,
         }
+
+        core.IBL(header, training_set, test_set, data, **params)
         # output = core.magic_function_to_do_all(params, training_set, test_set, data, args.category)
     else:
         print("spiral")

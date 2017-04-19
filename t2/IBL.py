@@ -1,3 +1,4 @@
+from classifiers import *
 from math import sqrt
 import numpy as np
 import utils
@@ -9,13 +10,18 @@ class Classifier:
         self.descriptor = []
 
     def classify(self, entry, class_index=-1):
-        max_similarity = -math.inf
-        best_entry = None
+        max_similarity = -float("inf")
+        best_entries = []
         for internal_entry in self.descriptor:
-            distance = euclidian_dist(entry, internal_entry)
-            if distance > max_similarity:
-                max_similarity = distance
-                best_entry = internal_entry
+            prepared_external_entry = utils.without_column(entry, class_index)
+            prepared_internal_entry = utils.without_column(internal_entry, class_index)
+            similarity = -euclidian_dist(prepared_external_entry, prepared_internal_entry)
+            if similarity > max_similarity:
+                max_similarity = similarity
+                best_entries = [internal_entry]
+            elif similarity == max_similarity:
+                best_entries.append(internal_entry)
+        best_entry = self.pick_one(best_entries)
         return best_entry[class_index]
 
     def add_random_entry(self, training_set):

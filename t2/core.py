@@ -3,12 +3,58 @@ from math import floor
 from matplotlib.colors import cnames
 
 import classifiers as cl
+from IBL import *
 import imagecollector as ic
-import utils
 import plotter as pl
 from spiral import *
+import utils
 
 allcolors = [color for color in sorted(cnames)]
+
+def test(classifier, header, test_set, **kargs):
+    hits = 0
+    fails = 0
+    for entry in test_set:
+        chosen = classifier.classify(entry, kargs["category"])
+        if chosen == entry[kargs["category"]]:
+            hits += 1
+        else:
+            fails += 1
+        entry[kargs["category"]] = chosen
+
+    print("---------------------")
+    print("Test statistics:")
+    print("Hits: %i" % (hits))
+    print("Fails: %i" % (fails))
+    print("Precision: %f%%" % (100 * hits / (hits + fails)))
+
+def classify(classifier, header, data, **kargs):
+    output = []
+    for entry in data:
+        chosen = classifier.classify(entry, kargs["category"])
+        entry[kargs["category"]] = chosen
+        output.append(entry)
+
+    if kargs["output"]:
+        utils.save_csv(kargs["output"], output);
+
+def IBL(header, training_set, test_set, data, **kargs):
+    algorithms = {
+        "IB1": IBL1,
+        "IB2": IBL2
+    }
+    classifier = algorithms[kargs["algorithm"]](training_set, kargs["category"])
+
+    print("Training statistics:")
+    print("Hits: %i" % (classifier.hits))
+    print("Fails: %i" % (classifier.fails))
+    print("Precision: %f%%" % (100 * classifier.hits / (classifier.hits + classifier.fails)))
+
+    if test_set:
+        test(classifier, header, test_set, **kargs)
+
+    if data:
+        classify(classifier, header, data, **kargs)
 
 def split_data(data, percentage):
     num_picked_entries = floor(len(data) * percentage / 100)
