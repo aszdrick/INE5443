@@ -4,26 +4,37 @@ import numpy as np
 from scipy.spatial import KDTree
 import utils
 
+def kdtree_classify(classifier, entry, class_index=-1):
+    prepared_entry = utils.without_column(entry, class_index)
+    result = classifier.descriptor.query([prepared_entry])
+    return classifier.categories[result[1][0]]
+
+def classify(self, entry, class_index=-1):
+    max_similarity = -float("inf")
+    best_categories = []
+    prepared_external_entry = utils.without_column(entry, class_index)
+    for i in range(len(self.descriptor)):
+        # prepared_internal_entry = utils.without_column(internal_entry, class_index)
+        internal_entry = self.descriptor[i]
+        class_value = self.categories[i]
+        similarity = -euclidian_dist(prepared_external_entry, internal_entry)
+        if similarity > max_similarity:
+            max_similarity = similarity
+            best_categories = [class_value]
+        elif similarity == max_similarity:
+            best_categories.append(class_value)
+    best_category = self.pick_one(best_categories)
+    return best_category
+
 class Classifier:
     def __init__(self):
         self.hits = 0
         self.fails = 0
         self.descriptor = []
+        self.categories = []
 
     def classify(self, entry, class_index=-1):
-        max_similarity = -float("inf")
-        best_entries = []
-        for internal_entry in self.descriptor:
-            prepared_external_entry = utils.without_column(entry, class_index)
-            prepared_internal_entry = utils.without_column(internal_entry, class_index)
-            similarity = -euclidian_dist(prepared_external_entry, prepared_internal_entry)
-            if similarity > max_similarity:
-                max_similarity = similarity
-                best_entries = [internal_entry]
-            elif similarity == max_similarity:
-                best_entries.append(internal_entry)
-        best_entry = self.pick_one(best_entries)
-        return best_entry[class_index]
+        return self.on_classify(self, entry, class_index)
 
     def add_random_entry(self, training_set):
         self.descriptor.append(self.pick_one(training_set))
@@ -34,6 +45,8 @@ class Classifier:
 class IBL1(Classifier):
     def __init__(self, training_set, class_index=-1):
         super(IBL1, self).__init__()
+        self.on_classify = kdtree_classify
+
         if len(self.descriptor) == 0:
             self.add_random_entry(training_set)
 
@@ -56,11 +69,18 @@ class IBL1(Classifier):
                 self.fails += 1
             self.descriptor.append(external_entry)
 
+        for i in range(len(self.descriptor)):
+            self.categories.append(self.descriptor[i][class_index])
+            self.descriptor[i] = utils.without_column(self.descriptor[i], class_index)
+        self.descriptor = KDTree(np.array(self.descriptor))
+
 class IBL2(Classifier):
     def __init__(self, training_set, class_index=-1):
         super(IBL2, self).__init__()
         if len(self.descriptor) == 0:
             self.add_random_entry(training_set)
+
+        self.on_classify = kdtree_classify
 
         for external_entry in training_set:
             max_similarity = -float("inf")
