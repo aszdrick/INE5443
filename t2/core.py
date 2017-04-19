@@ -27,7 +27,7 @@ def process_spiral(spiral_type, size, noise):
         remove = set(s[0]) | set(s[1])
         spiral = [(s[0][i][0] + size, s[0][i][1] + size, "#FF0000") for i in range(len(s[0]))]
         spiral += [(s[1][i][0] + size, s[1][i][1] + size, "#0000FF") for i in range(len(s[1]))]
-    data = set(itertools.permutations(range(data_size), 2)) - remove
+    data = set(itertools.product(range(data_size), repeat=2)) - remove
     data = [[t[0], t[1], None] for t in data]
     return (["x", "y", "color"], sorted(spiral), sorted(data), data_size)
 
