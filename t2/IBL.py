@@ -101,6 +101,11 @@ class IBL2(Classifier):
                 self.fails += 1
                 self.descriptor.append(external_entry)
 
+        for i in range(len(self.descriptor)):
+            self.categories.append(self.descriptor[i][class_index])
+            self.descriptor[i] = utils.without_column(self.descriptor[i], class_index)
+        self.descriptor = KDTree(np.array(self.descriptor))
+
 class IBL3(Classifier):
     class Register:
         def __init__(self, entry, category):
