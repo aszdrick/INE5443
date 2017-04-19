@@ -29,7 +29,7 @@ def process_spiral(spiral_type, size, noise):
         spiral += [(s[1][i][0] + size, s[1][i][1] + size, "#0000FF") for i in range(len(s[1]))]
     data = set(itertools.permutations(range(data_size), 2)) - remove
     data = [[t[0], t[1], None] for t in data]
-    return (["x", "y", "color"], spiral, data, data_size)
+    return (["x", "y", "color"], sorted(spiral), sorted(data), data_size)
 
 def test(classifier, test_set, **kargs):
     hits = 0
