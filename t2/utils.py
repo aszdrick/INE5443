@@ -37,6 +37,27 @@ def ignore_columns(dataset, columns):
         for index in columns:
             del entry[index]
 
+# def aglutinate(dataset, columns):
+#     result = []
+#     for entry in dataset:
+#         new_entry = []
+#         aglutination = ""
+#         last_column = -1
+#         for i in reversed(range(len(entry))):
+#             if i not in columns:
+#                 new_entry.append(entry[i])
+#             elif last_column == -1:
+#                 last_column = i
+#                 print(entry[i])
+#                 entry[i] = str(entry[i])
+#             else:
+#                 entry[last_column] += str(entry[i])
+#                 del entry[i]
+#         new_entry.append(aglutination)
+#         result.append(new_entry)
+#     dataset = result
+#     return last_column
+
 def tuple_difference(first, second):
     result = ()
     for i in range(len(first)):

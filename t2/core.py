@@ -13,6 +13,17 @@ import utils
 # allcolors = [color for color in sorted(cnames)]
 allcolors = [color for key, color in sorted(cnames.items())]
 
+def plot(output, training_set, header, category):
+    categories = list(set([x[category] for x in training_set]))
+    pl.plot(
+        [x[:2] for x in output[1:]],
+        [x[2] for x in output[1:]],
+        [x[:2] for x in training_set],
+        [x[2] for x in training_set],
+        utils.without_column(header, category),
+        {categories[i]: allcolors[((i + 1) * 41) % len(allcolors)] for i in range(len(categories))}
+    )
+
 def process_spiral(spiral_type, size, noise):
     half = size / 2
     spiral = []
@@ -51,6 +62,7 @@ def test(classifier, test_set, **kargs):
     print("Hits: %i" % (hits))
     print("Fails: %i" % (fails))
     print("Precision: %f%%" % (100 * hits / (hits + fails)))
+    return test_set
 
 def classify(classifier, data, **kargs):
     output = []
@@ -73,13 +85,14 @@ def IBL(training_set, test_set, data, **kargs):
     print("Fails: %i" % (classifier.fails))
     print("Precision: %f%%" % (100 * classifier.hits / (classifier.hits + classifier.fails)))
 
+    output = [[], []]
     if test_set:
-        test(classifier, test_set, **kargs)
+        output[0] = test(classifier, test_set, **kargs)
 
     if data:
-        return classify(classifier, data, **kargs)
+        output[1] = classify(classifier, data, **kargs)
 
-    return []
+    return output
 
 def split_data(data, percentage):
     num_picked_entries = floor(len(data) * percentage / 100)

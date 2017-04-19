@@ -2,6 +2,7 @@
 
 from arguments import *
 import core
+import image
 import utils
 
 def process_dataset(args):
@@ -22,6 +23,13 @@ def process_dataset(args):
     else:
         dataset.error("one of the arguments -d/--data -e/--test_set -s/--split is required")
 
+    # if len(args.category) > 1:
+    #     categories = sorted(args.category)
+    #     args.category = utils.aglutinate(training_header, categories)
+    #     utils.aglutinate(training_set, categories)
+    #     utils.aglutinate(test_set, categories)
+    #     utils.aglutinate(data, categories)
+
     if args.ignore:
         utils.ignore_columns(training_set, args.ignore)
         utils.ignore_columns(test_set, args.ignore)
@@ -29,6 +37,7 @@ def process_dataset(args):
         for index in args.ignore:
             if index < args.category:
                 args.category -= 1
+
 
     return (training_header, training_set, test_set, data)
 
@@ -41,6 +50,12 @@ if __name__ == "__main__":
             "category": args.category
         }
         output = core.IBL(training_set, test_set, data, **params)
+        if args.show:
+            if len(training_set[0]) == 3:
+                core.plot(output[0], training_set, header, args.category)
+            else:
+                print("Cannot show non-2D data.")
+
     else:
         header, training_set, data, size = core.process_spiral(args.spiral_type, args.grid_size, args.noise)
         test_set = []
@@ -48,8 +63,7 @@ if __name__ == "__main__":
             "algorithm": args.algorithm,
             "category": 2
         }
-        output = core.IBL(training_set, test_set, data, **params)
-        import image
+
         image.save(
             positions=[(x[0], x[1]) for x in training_set],
             colors=[utils.hex_to_tuple(x[2]) for x in training_set],
@@ -59,11 +73,17 @@ if __name__ == "__main__":
             show=args.show
         )
 
-        image.save(
-            positions=[(x[0], x[1]) for x in output],
-            colors=[utils.hex_to_tuple(x[2]) for x in output],
-            width=size,
-            height=size,
-            path=args.output + ".png",
-            show=args.show
-        )
+        output = core.IBL(training_set, test_set, data, **params)
+        colors = [utils.hex_to_tuple(x[2]) for x in output[1]]
+
+        if len(training_set[0]) == 3:
+            image.save(
+                positions=[(x[0], x[1]) for x in output[1]],
+                colors=colors,
+                width=size,
+                height=size,
+                path=args.output + ".png",
+                show=args.show
+            )
+
+
