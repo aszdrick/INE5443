@@ -54,7 +54,7 @@ def classify_dataset(args):
     
     if args.show:
         if len(training_set[0]) == 3:
-            core.plot(output[0], training_set, header, args.category)
+            core.plot(training_set, output[0], output[1], header, args.category)
         else:
             print("Cannot show non-2D data.")
 

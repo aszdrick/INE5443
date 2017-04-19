@@ -13,13 +13,12 @@ import utils
 # allcolors = [color for color in sorted(cnames)]
 allcolors = [color for key, color in sorted(cnames.items())]
 
-def plot(output, training_set, header, category):
+def plot(training_set, test_set, data, header, category):
     categories = list(set([x[category] for x in training_set]))
     pl.plot(
-        [x[:2] for x in output[1:]],
-        [x[2] for x in output[1:]],
-        [x[:2] for x in training_set],
-        [x[2] for x in training_set],
+        training_set,
+        test_set,
+        data,
         utils.without_column(header, category),
         {categories[i]: allcolors[((i + 1) * 41) % len(allcolors)] for i in range(len(categories))}
     )
