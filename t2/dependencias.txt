@@ -1,9 +1,0 @@
-Dependências:
-	pip3
-	numpy
-	matplotlib
-	pillow
-	scipy
-
-Para instalar os módulos após ter o pip3, executar:
-	pip3 install numpy matplotlib pillow scipy
