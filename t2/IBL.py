@@ -195,21 +195,24 @@ class IBL3(Classifier):
 
     # Updates the register statistics and the frequency data
     def update_register(self, register, reference):
-        self.frequency_data[register.category] -= 1
-        self.frequency_data[reference.category] += 1
-        register.category = reference.category
+        # self.frequency_data[register.category] -= 1
+        # self.frequency_data[reference.category] += 1
+        # register.category = reference.category
         # TODO
+        pass
 
     def useless(self, register):
         # TODO
         return False
 
     def acceptable(self, register):
-        freq = self.frequency_data[register.category]
-        prec = register.precision_data
-        if prec.sup < freq.inf:
-            return False
+        # TODO
         return True
+        # freq = self.frequency_data[register.category]
+        # prec = register.precision_data
+        # if prec.sup < freq.inf:
+        #     return False
+        # return True
 
     def interval(self, p, z, n):
         d = (1 + (z * z) / n)
