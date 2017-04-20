@@ -24,9 +24,9 @@ def plot(training_set, test_set, data, axis_labels, colors):
         labels.append("Test set")
 
     if len(data) > 0:
-        xs = np.array([entry[0] for entry in test_set])
-        ys = np.array([entry[1] for entry in test_set])
-        cs = np.array([colors[entry[2]] for entry in test_set])
+        xs = np.array([entry[0] for entry in data])
+        ys = np.array([entry[1] for entry in data])
+        cs = np.array([colors[entry[2]] for entry in data])
         md = plt.scatter(xs, ys, c=cs, marker='s')
         handles.append(md)
         labels.append("Classified data")
