@@ -85,7 +85,7 @@ def test(classifier, test_set, **kargs):
 def classify(classifier, data, **kargs):
     output = []
     for entry in data:
-        chosen = classifier.classify(entry, kargs["category"])
+        chosen = classifier.classify(entry, kargs["category"], kargs["k"])
         entry[kargs["category"]] = chosen
         output.append(entry)
     return output;

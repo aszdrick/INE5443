@@ -4,10 +4,27 @@ import numpy as np
 from scipy.spatial import KDTree
 import utils
 
-def kdtree_classify(classifier, entry, class_index=-1):
+def kdtree_classify(classifier, entry, class_index=-1, k=1):
     prepared_entry = utils.without_column(entry, class_index)
-    result = classifier.descriptor.query([prepared_entry])
-    return classifier.categories[result[1][0]]
+    result = classifier.descriptor.query([prepared_entry], k=k)
+    scoreboard = {}
+
+    indexes = result[1]
+    if k > 1:
+        indexes = indexes[0]
+
+    for index in indexes:
+        category = classifier.categories[index]
+        if category not in scoreboard:
+            scoreboard[category] = 0
+        scoreboard[category] += 1
+
+    winner = (0, None)
+    for key, value in scoreboard.items():
+        if value > winner[0]:
+            winner = (value, key)
+
+    return winner[1]
 
 def classify(self, entry, class_index=-1):
     max_similarity = -float("inf")
@@ -33,8 +50,8 @@ class Classifier:
         self.descriptor = []
         self.categories = []
 
-    def classify(self, entry, class_index=-1):
-        return self.on_classify(self, entry, class_index)
+    def classify(self, entry, class_index=-1, k=1):
+        return self.on_classify(self, entry, class_index, k)
 
     def add_random_entry(self, training_set):
         self.descriptor.append(self.pick_one(training_set))

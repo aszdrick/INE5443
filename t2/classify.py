@@ -45,7 +45,8 @@ def classify_dataset(args):
     header, training_set, test_set, data = process_dataset(args)
     params = {
         "algorithm": args.algorithm,
-        "category": args.category
+        "category": args.category,
+        "k": args.knn
     }
     output = core.IBL(training_set, test_set, data, **params)
     
@@ -64,7 +65,8 @@ def classify_spiral(args):
     test_set = []
     params = {
         "algorithm": args.algorithm,
-        "category": 2
+        "category": 2,
+        "k": args.knn
     }
     output = core.IBL(training_set, test_set, data, **params)
     core.save_spirals(training_set, output, args.output, size, args.show)
