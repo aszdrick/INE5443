@@ -133,6 +133,7 @@ class IBL3(Classifier):
 
     def __init__(self, training_set, class_index=-1):
         super(IBL3, self).__init__()
+        self.on_classify = kdtree_classify
         self.frequency_data = {}
 
         parsed_entries = 0
@@ -186,6 +187,12 @@ class IBL3(Classifier):
                         i -= 1
             parsed_entries += 1
 
+        for i in range(len(self.descriptor)):
+            self.categories.append(self.descriptor[i][class_index])
+            self.descriptor[i] = utils.without_column(self.descriptor[i], class_index)
+        self.descriptor = KDTree(np.array(self.descriptor))
+
+
     # Updates the register statistics and the frequency data
     def update_register(self, register, reference):
         self.frequency_data[register.category] -= 1
@@ -212,6 +219,7 @@ class IBL3(Classifier):
             "inf": (f1 - f2) / d,
             "sup": (f1 + f2) / d
         }
+
 
 class IBL4(Classifier):
     class Register:
