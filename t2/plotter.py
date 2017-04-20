@@ -27,7 +27,7 @@ def plot(training_set, test_set, data, axis_labels, colors):
         xs = np.array([entry[0] for entry in test_set])
         ys = np.array([entry[1] for entry in test_set])
         cs = np.array([colors[entry[2]] for entry in test_set])
-        md = plt.scatter(xs, ys, c=cs, marker='o')
+        md = plt.scatter(xs, ys, c=cs, marker='s')
         handles.append(md)
         labels.append("Classified data")
 
