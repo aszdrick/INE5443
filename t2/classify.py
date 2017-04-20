@@ -18,10 +18,11 @@ def process_dataset(args):
         test_header, test_set = utils.load_csv(args.test_set)
         if len(test_set) == 0:
             dataset.error("Invalid test set: file does not exist or is empty.")
-    elif args.data:
-        data_header, data = utils.load_csv(args.data)
-    else:
+    elif not args.data:
         dataset.error("one of the arguments -d/--data -e/--test_set -s/--split is required")
+
+    if args.data:
+        data_header, data = utils.load_csv(args.data)
 
     # if len(args.category) > 1:
     #     categories = sorted(args.category)
@@ -49,10 +50,10 @@ def classify_dataset(args):
         "k": args.knn
     }
     output = core.IBL(training_set, test_set, data, **params)
-    
+
     if len(output[1]) > 0:
         utils.save_csv(args.output, [header] + output[1])
-    
+
     if args.show:
         if len(training_set[0]) == 3:
             core.plot(training_set, output[0], output[1], header, args.category)
