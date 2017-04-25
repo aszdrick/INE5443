@@ -6,7 +6,7 @@ rm virtualenv-15.1.0.tar.gz
 cd virtualenv-15.1.0
 python3 virtualenv.py ../sandbox
 
-if [ "$#" -lt 1 ]; then
+if [[ $# -lt 1 ]]; then
 	echo 
 	echo '--------------------------------'
 	echo 'Execute ". sandbox/bin/activate"'
