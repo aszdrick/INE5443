@@ -56,11 +56,14 @@ class Classifier:
     def add_random_entry(self, training_set):
         self.descriptor.append(self.pick_one(training_set))
 
+    def pick_index(self, array):
+        return round(np.random.uniform(0, len(array) - 1))
+
     def pick_one(self, array):
-        return array[round(np.random.uniform(0, len(array) - 1))]
+        return array[self.pick_index(array)]
 
     def remove_one(self, array):
-        index = round(np.random.uniform(0, len(array) - 1))
+        index = self.pick_index(array)
         value = array[index]
         del array[index]
         return value
@@ -144,106 +147,124 @@ class IBL3(Classifier):
 
         self.frequency_data = {}
 
+        # Adds a random instance to the descriptor
         if len(self.descriptor) == 0:
             random_entry = self.remove_one(training_set)
-            prepared_entry = utils.without_column(entry, class_index)
-            class_value = entry[class_index]
+            (entry, class_value) = self.prepare(random_entry, class_index)
             self.frequency_data[class_value] = 1
 
-            register = self.Register(prepared_entry, class_value)
+            register = self.Register(entry, class_value)
             register.hits += 1
             self.descriptor.append(register)
 
-        parsed_entries = 0
-        for entry in training_set:
-            prepared_entry = utils.without_column(entry, class_index)
-            class_value = entry[class_index]
+        training_size = len(training_set)
+        processed_instances = 0
 
-            similarity_list = {}
-            acceptable_list = []
-            best_acceptable_similarity = -float("inf")
-            best_acceptables = []
-            i = 0
-            # 1.
+        for external_entry in training_set:
+            (entry, class_value) = self.prepare(external_entry, class_index)
+
+            # Updates the frequency data
+            # TODO: is this the right place to do it?
+            self.frequency_data[class_value] += 1
+
+            # Searches for acceptable instances in the descriptor
+            best_acceptable = None
+            similarity_table = {}
             for register in self.descriptor:
-                internal_entry = register.entry
-                p = register.hits / (register.hits + register.misses)
-                precision_interval = self.interval()
+                category = register.category
 
-                similarity = -euclidian_dist(prepared_entry, internal_entry)
-                similarity_list[register] = similarity
-                if (self.acceptable(register)):
-                    acceptable_list.append(register)
-                    if similarity > best_acceptable_similarity:
-                        best_acceptable_similarity = similarity
-                        best_acceptable = [register]
-                    elif similarity == best_acceptable_similarity:
-                        best_acceptables.append(register)
-                i += 1
+                # Populates the similarity table
+                similarity = -euclidian_dist(entry, register.entry)
+                similarity_table[register.entry] = similarity
 
-            # 2.
-            best_register = None
-            if len(acceptable_list) > 0:
-                best_register = self.pick_one(best_acceptables)
-            elif len(self.descriptor) > 0:
-                best_register = self.pick_one(self.descriptor)
+                # classifying acceptability factor
+                z = 0.9
 
-            # 3.
-            # best_register is still None if len(self.descriptor) == 0
-            if best_register and \
-               entry[class_index] == best_register.category:
-                self.hits += 1
+                # Calculates the frequency interval (class)
+                p = frequency_data[category] / training_size
+                n = processed_instances
+                frequency_interval = self.interval(p, z, n)
+
+                # Calculates the precision interval (instance)
+                n = register.hits + register.fails
+                p = register.hits / n
+                precision_interval = self.interval(p, z, n)
+
+                # TODO: should we accept in case 3 (overlapping intervals)?
+                if frequency_interval["sup"] < precision_interval["inf"]:
+                    # Accept the instance
+                    if not best_acceptable or best_acceptable[1] < similarity:
+                        best_acceptable = (register, similarity)
+                    # TODO: should we do something if best_acceptable[1] == similarity?
+
+            if not best_acceptable:
+                # No acceptable instances were found,
+                # so use a random register instead
+                random_register = self.pick_one(self.descriptor)
+
+                similarity = similarity_table[random_register.entry]
+                best_acceptable = (random_register, similarity)
+
+            if best_acceptable[0].category == class_value:
+                # Correct evaluation, simply update the hit counter
+                best_acceptable[0].hits += 1
             else:
-                new_register = self.Register(prepared_entry, class_value)
-                new_register.fails += 1
-                self.fails += 1
-                if class_value not in self.frequency_data:
-                    self.frequency_data[class_value] = 0
-                self.frequency_data += 1
+                # Incorrect evaluation, update the fail counter, then learn
+                best_acceptable[0].fails += 1
+
+                # Learn the new entry
+                new_register = self.Register(entry, class_value)
                 self.descriptor.append(new_register)
-            parsed_entries += 1
 
-            self.update_boundaries()
+            # Updates the processed instances counter
+            # TODO: is this the right place to do it?
+            processed_instances += 1
 
-            # 4.
-            if best_register:
-                for i in range(len(self.descriptor)):
-                    register = self.descriptor[i]
-                    if similarity_list[register] >= similarity_list[best_register]:
-                        self.update_register(register, best_register)
-                        if self.useless(register):
-                            del self.descriptor[i]
-                            i -= 1
+            # Update all registers in range
+            for i in range(len(self.descriptor)):
+                register = self.descriptor[i]
 
+                # Similarity of the register used as the best "acceptable"
+                outer_similarity = best_acceptable[1]
+                similarity = similarity_table[register.entry]
+
+                # TODO: should this inequality be strict?
+                if similarity > outer_similarity:
+                    category = register.category
+
+                    # Update the current register
+                    # TODO: not sure about this part (it makes sense though)
+                    if category == class_value:
+                        register.hits += 1
+                    else:
+                        register.fails += 1
+
+                    # discard factor
+                    z = 0.75
+
+                    # Calculates the frequency interval (class)
+                    p = frequency_data[category] / training_size
+                    n = processed_instances
+                    frequency_interval = self.interval(p, z, n)
+
+                    # Calculates the precision interval (instance)
+                    n = register.hits + register.fails
+                    p = register.hits / n
+                    precision_interval = self.interval(p, z, n)
+
+                    if precision_interval["sup"] < frequency_interval["inf"]:
+                        # Discard the instance
+                        del self.descriptor[i]
+                        i -= 1
+
+        # Transforms the descriptor into a KD-Tree
         for i in range(len(self.descriptor)):
             self.categories.append(self.descriptor[i][class_index])
             self.descriptor[i] = utils.without_column(self.descriptor[i], class_index)
         self.descriptor = KDTree(np.array(self.descriptor))
 
-    def update_boundaries(self):
-        # n = 
-        # TODO
-        pass
-
-    # Updates the register statistics and the frequency data
-    def update_register(self, register, best):
-        if register.category == best.category:
-            register.hits += 1
-        else:
-            register.fails += 1
-
-    def useless(self, register):
-        # TODO
-        return False
-
-    def acceptable(self, register):
-        # TODO
-        return True
-        # freq = self.frequency_data[register.category]
-        # prec = register.precision_data
-        # if prec.sup < freq.inf:
-        #     return False
-        # return True
+    def prepare(self, entry, class_index=-1):
+        return (utils.without_column(entry, class_index), entry[class_index])
 
     def interval(self, p, z, n):
         d = (1 + (z * z) / n)

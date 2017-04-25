@@ -93,7 +93,8 @@ def classify(classifier, data, **kargs):
 def IBL(training_set, test_set, data, **kargs):
     algorithms = {
         "IB1": IBL1,
-        "IB2": IBL2
+        "IB2": IBL2,
+        "IB3": IBL3,
     }
 
     classifier = algorithms[kargs["algorithm"]](training_set, kargs["category"])
