@@ -193,12 +193,10 @@ class IBL3(Classifier):
                 p = register.hits / n
                 precision_interval = self.interval(p, z, n)
 
-                # TODO: should we accept in case 3 (overlapping intervals)?
                 if frequency_interval["sup"] < precision_interval["inf"]:
                     # Accept the instance
                     if not best_acceptable or best_acceptable[1] < similarity:
                         best_acceptable = (register, similarity)
-                    # TODO: should we do something if best_acceptable[1] == similarity?
 
             if not best_acceptable:
                 # No acceptable instances were found,
@@ -233,7 +231,6 @@ class IBL3(Classifier):
             # Update all registers in range
             descriptor_size = len(self.descriptor)
 
-            # TODO: should we ignore the new entry?
             # If we just appended a new entry, ignore it
             if learned:
                 descriptor_size -= 1
@@ -245,12 +242,10 @@ class IBL3(Classifier):
                 outer_similarity = best_acceptable[1]
                 similarity = similarity_table[tuple(register.entry)]
 
-                # TODO: should this inequality be strict?
-                if similarity > outer_similarity:
+                if similarity >= outer_similarity:
                     category = register.category
 
                     # Update the current register
-                    # TODO: not sure about this part (it makes sense though)
                     if category == class_value:
                         register.hits += 1
                     else:
@@ -292,7 +287,6 @@ class IBL3(Classifier):
             "inf": (f1 - f2) / d,
             "sup": (f1 + f2) / d
         }
-
 
 class IBL4(Classifier):
     class Register:
