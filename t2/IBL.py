@@ -272,6 +272,7 @@ class IBL3(Classifier):
                     if precision_interval["sup"] < frequency_interval["inf"]:
                         # Discard the instance
                         del self.descriptor[i]
+                        descriptor_size -= 1
                         i -= 1
 
         # Transforms the descriptor into a KD-Tree
