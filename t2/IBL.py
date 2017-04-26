@@ -210,12 +210,10 @@ class IBL3(Classifier):
             learned = False
 
             if best_acceptable[0].category == class_value:
-                # Correct evaluation, simply update the hit counters
-                best_acceptable[0].hits += 1
+                # Correct evaluation, simply update the hit counter
                 self.hits += 1
             else:
-                # Incorrect evaluation, update the fail counters, then learn
-                best_acceptable[0].fails += 1
+                # Incorrect evaluation, update the fail counter, then learn
                 self.fails += 1
 
                 # Learn the new entry
