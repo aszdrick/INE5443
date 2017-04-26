@@ -225,7 +225,6 @@ class IBL3(Classifier):
                 learned = True
 
             # Updates the processed instances counter
-            # TODO: is this the right place to do it?
             processed_instances += 1
 
             # Update all registers in range
@@ -235,7 +234,8 @@ class IBL3(Classifier):
             if learned:
                 descriptor_size -= 1
 
-            for i in range(descriptor_size):
+            i = 0
+            while i < descriptor_size:
                 register = self.descriptor[i]
 
                 # Similarity of the register used as the best "acceptable"
@@ -269,6 +269,7 @@ class IBL3(Classifier):
                         del self.descriptor[i]
                         descriptor_size -= 1
                         i -= 1
+                i += 1
 
         # Transforms the descriptor into a KD-Tree
         for i in range(len(self.descriptor)):
