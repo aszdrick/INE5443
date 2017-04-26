@@ -147,13 +147,14 @@ class IBL3(Classifier):
 
         frequency_data = {}
         processed_instances = 0
+        dropped_instances = 0
 
         # Adds a random instance to the descriptor
         if len(self.descriptor) == 0:
             random_entry = self.remove_one(training_set)
             (entry, class_value) = self.prepare(random_entry, class_index)
             frequency_data[class_value] = 1
-            processed_instances += 1;
+            processed_instances += 1
 
             register = self.Register(entry, class_value)
             register.hits += 1
@@ -163,12 +164,6 @@ class IBL3(Classifier):
 
         for external_entry in training_set:
             (entry, class_value) = self.prepare(external_entry, class_index)
-
-            # Updates the frequency data
-            # TODO: is this the right place to do it?
-            if class_value not in frequency_data:
-                frequency_data[class_value] = 0
-            frequency_data[class_value] += 1
 
             # Searches for acceptable instances in the descriptor
             best_acceptable = None
@@ -184,7 +179,7 @@ class IBL3(Classifier):
                 z = 0.9
 
                 # Calculates the frequency interval (class)
-                p = frequency_data[category] / training_size
+                p = frequency_data[category] / len(self.descriptor)
                 n = processed_instances
                 frequency_interval = self.interval(p, z, n)
 
@@ -198,7 +193,7 @@ class IBL3(Classifier):
                     if not best_acceptable or best_acceptable[1] < similarity:
                         best_acceptable = (register, similarity)
 
-            if not best_acceptable:
+            if not best_acceptable and len(self.descriptor) > 0:
                 # No acceptable instances were found,
                 # so use a random register instead
                 random_register = self.pick_one(self.descriptor)
@@ -209,7 +204,7 @@ class IBL3(Classifier):
             # Flag that indicates if we learned a new entry
             learned = False
 
-            if best_acceptable[0].category == class_value:
+            if best_acceptable and best_acceptable[0].category == class_value:
                 # Correct evaluation, simply update the hit counter
                 self.hits += 1
             else:
@@ -222,16 +217,22 @@ class IBL3(Classifier):
                 self.descriptor.append(new_register)
                 learned = True
 
+                # Updates the frequency data
+                # TODO: is this the right place to do it?
+                if class_value not in frequency_data:
+                    frequency_data[class_value] = 0
+                frequency_data[class_value] += 1
+
             # Updates the processed instances counter
             processed_instances += 1
 
-            # Update all registers in range
-            descriptor_size = len(self.descriptor)
-
+            # Size of the search space
             # If we just appended a new entry, ignore it
+            descriptor_size = len(self.descriptor)
             if learned:
                 descriptor_size -= 1
 
+            # Update all registers in range
             i = 0
             while i < descriptor_size:
                 register = self.descriptor[i]
@@ -253,7 +254,7 @@ class IBL3(Classifier):
                     z = 0.75
 
                     # Calculates the frequency interval (class)
-                    p = frequency_data[category] / training_size
+                    p = frequency_data[category] / len(self.descriptor)
                     n = processed_instances
                     frequency_interval = self.interval(p, z, n)
 
@@ -266,8 +267,12 @@ class IBL3(Classifier):
                         # Discard the instance
                         del self.descriptor[i]
                         descriptor_size -= 1
+                        frequency_data[category] -= 1
+                        dropped_instances += 1
                         i -= 1
                 i += 1
+
+        print("Dropped: %s" % (dropped_instances))
 
         # Transforms the descriptor into a KD-Tree
         for i in range(len(self.descriptor)):
