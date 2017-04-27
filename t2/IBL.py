@@ -312,6 +312,7 @@ class IBL4(Classifier):
 
         frequency_data = {}
         processed_instances = 0
+        dropped_instances = 0
         accumulated_weights = []
         normalized_weights = []
         weights = []
@@ -329,7 +330,7 @@ class IBL4(Classifier):
                 weights.append(1 / num_attributes)
 
             frequency_data[class_value] = 1
-            processed_instances += 1;
+            processed_instances += 1
 
             register = self.Register(entry, class_value)
             register.hits += 1
@@ -340,11 +341,8 @@ class IBL4(Classifier):
         for external_entry in training_set:
             (entry, class_value) = self.prepare(external_entry, class_index)
 
-            # Updates the frequency data
-            # TODO: is this the right place to do it?
             if class_value not in frequency_data:
                 frequency_data[class_value] = 0
-            frequency_data[class_value] += 1
 
             # Searches for acceptable instances in the descriptor
             best_acceptable = None
@@ -360,7 +358,7 @@ class IBL4(Classifier):
                 z = 0.9
 
                 # Calculates the frequency interval (class)
-                p = frequency_data[category] / training_size
+                p = frequency_data[category] / len(self.descriptor)
                 n = processed_instances
                 frequency_interval = self.interval(p, z, n)
 
@@ -369,14 +367,12 @@ class IBL4(Classifier):
                 p = register.hits / n
                 precision_interval = self.interval(p, z, n)
 
-                # TODO: should we accept in case 3 (overlapping intervals)?
                 if frequency_interval["sup"] < precision_interval["inf"]:
                     # Accept the instance
                     if not best_acceptable or best_acceptable[1] < similarity:
                         best_acceptable = (register, similarity)
-                    # TODO: should we do something if best_acceptable[1] == similarity?
 
-            if not best_acceptable:
+            if not best_acceptable and len(self.descriptor) > 0:
                 # No acceptable instances were found,
                 # so use a random register instead
                 random_register = self.pick_one(self.descriptor)
@@ -387,13 +383,11 @@ class IBL4(Classifier):
             # Flag that indicates if we learned a new entry
             learned = False
 
-            if best_acceptable[0].category == class_value:
-                # Correct evaluation, simply update the hit counters
-                best_acceptable[0].hits += 1
+            if best_acceptable and best_acceptable[0].category == class_value:
+                # Correct evaluation, simply update the hit counter
                 self.hits += 1
             else:
-                # Incorrect evaluation, update the fail counters, then learn
-                best_acceptable[0].fails += 1
+                # Incorrect evaluation, update the fail counter, then learn
                 self.fails += 1
 
                 # Learn the new entry
@@ -402,31 +396,31 @@ class IBL4(Classifier):
                 self.descriptor.append(new_register)
                 learned = True
 
+                # Updates the frequency data
+                frequency_data[class_value] += 1
+
             # Updates the processed instances counter
-            # TODO: is this the right place to do it?
             processed_instances += 1
 
-            # Update all registers in range
-            descriptor_size = len(self.descriptor)
-
-            # TODO: should we ignore the new entry?
+            # Size of the search space
             # If we just appended a new entry, ignore it
+            descriptor_size = len(self.descriptor)
             if learned:
                 descriptor_size -= 1
 
-            for i in range(descriptor_size):
+            # Update all registers in range
+            i = 0
+            while i < descriptor_size:
                 register = self.descriptor[i]
 
                 # Similarity of the register used as the best "acceptable"
                 outer_similarity = best_acceptable[1]
                 similarity = similarity_table[register.id]
 
-                # TODO: should this inequality be strict?
-                if similarity > outer_similarity:
+                if similarity >= outer_similarity:
                     category = register.category
 
                     # Update the current register
-                    # TODO: not sure about this part (it makes sense though)
                     if category == class_value:
                         register.hits += 1
                     else:
@@ -436,7 +430,7 @@ class IBL4(Classifier):
                     z = 0.75
 
                     # Calculates the frequency interval (class)
-                    p = frequency_data[category] / training_size
+                    p = frequency_data[category] / len(self.descriptor)
                     n = processed_instances
                     frequency_interval = self.interval(p, z, n)
 
@@ -448,27 +442,35 @@ class IBL4(Classifier):
                     if precision_interval["sup"] < frequency_interval["inf"]:
                         # Discard the instance
                         del self.descriptor[i]
+                        descriptor_size -= 1
+                        frequency_data[category] -= 1
+                        dropped_instances += 1
                         i -= 1
+                i += 1
 
             # Iterates over the attributes, updating its weights
-            reference = best_acceptable[0]
-            category = reference.category
-            for i in range(len(reference.entry)):
-                delta = abs(entry[i] - reference.entry[i])
+            if len(self.descriptor) > 0:
+                reference = best_acceptable[0]
+                category = reference.category
+                for i in range(len(reference.entry)):
+                    delta = abs(entry[i] - reference.entry[i])
 
-                lambd = max(frequency_data[class_value], frequency_data[category])
-                complement = 1 - lambd
-                if class_value == reference.entry[i]:
-                    accumulated_weights[i] += complement * (1 - delta)
-                else:
-                    accumulated_weights[i] += complement * delta
-                normalized_weights[i] += complement
+                    lambd = max(frequency_data[class_value], frequency_data[category])
+                    lambd /= len(self.descriptor)
+                    complement = 1 - lambd
+                    if class_value == reference.entry[i]:
+                        accumulated_weights[i] += complement * (1 - delta)
+                    else:
+                        accumulated_weights[i] += complement * delta
+                    normalized_weights[i] += complement
 
-                acc = accumulated_weights[i]
-                norm = normalized_weights[i]
-                if norm == 0:
-                    print("lambd = %s, comp = %s" % (lambd, complement))
-                weights[i] = max(0, acc / norm - 0.5)
+                    acc = accumulated_weights[i]
+                    norm = normalized_weights[i]
+                    if norm == 0:
+                        print("lambd = %s, comp = %s" % (lambd, complement))
+                    weights[i] = max(0, acc / norm - 0.5)
+
+        print("Dropped: %s" % (dropped_instances))
 
         for i in range(len(self.descriptor)):
             self.categories.append(self.descriptor[i].category)
