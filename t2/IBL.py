@@ -494,3 +494,212 @@ class IBL4(Classifier):
             "sup": (f1 + f2) / d
         }
 
+class IBL5(Classifier):
+    class Register:
+        counter = 0
+        def __init__(self, entry, category):
+            self.id = self.counter
+            self.category = category
+            self.entry = entry
+            self.hits = 0
+            self.fails = 0
+            self.counter += 1
+
+    def __init__(self, training_set, class_index=-1):
+        super(IBL5, self).__init__()
+        self.on_classify = classify
+
+        frequency_data = {}
+        processed_instances = 0
+        dropped_instances = 0
+        accumulated_weights = []
+        normalized_weights = []
+        weights = []
+
+        # Adds a random instance to the descriptor
+        if len(self.descriptor) == 0:
+            random_entry = self.remove_one(training_set)
+            (entry, class_value) = self.prepare(random_entry, class_index)
+
+            # Sets initial values for the weights
+            num_attributes = len(entry)
+            for i in range(len(entry)):
+                accumulated_weights.append(0.01)
+                normalized_weights.append(0.01)
+                weights.append(1 / num_attributes)
+
+            frequency_data[class_value] = 1
+            processed_instances += 1
+
+            register = self.Register(entry, class_value)
+            register.hits += 1
+            self.descriptor.append(register)
+
+        training_size = len(training_set)
+
+        for external_entry in training_set:
+            (entry, class_value) = self.prepare(external_entry, class_index)
+
+            if class_value not in frequency_data:
+                frequency_data[class_value] = 0
+
+            # Searches for acceptable instances in the descriptor
+            best_acceptable = None
+            similarity_table = {}
+            for register in self.descriptor:
+                category = register.category
+
+                # Populates the similarity table
+                similarity = self.weighted_similarity(entry, register.entry, weights)
+                similarity_table[register.id] = similarity
+
+                # classifying acceptability factor
+                z = 0.9
+
+                # Calculates the frequency interval (class)
+                p = frequency_data[category] / len(self.descriptor)
+                n = processed_instances
+                frequency_interval = self.interval(p, z, n)
+
+                # Calculates the precision interval (instance)
+                n = register.hits + register.fails
+                p = register.hits / n
+                precision_interval = self.interval(p, z, n)
+
+                if frequency_interval["sup"] < precision_interval["inf"]:
+                    # Accept the instance
+                    if not best_acceptable or best_acceptable[1] < similarity:
+                        best_acceptable = (register, similarity)
+
+            if not best_acceptable and len(self.descriptor) > 0:
+                # No acceptable instances were found,
+                # so use a random register instead
+                random_register = self.pick_one(self.descriptor)
+
+                similarity = similarity_table[random_register.id]
+                best_acceptable = (random_register, similarity)
+
+            # Flag that indicates if we learned a new entry
+            learned = False
+
+            if best_acceptable and best_acceptable[0].category == class_value:
+                # Correct evaluation, simply update the hit counter
+                self.hits += 1
+            else:
+                # Incorrect evaluation, update the fail counter, then learn
+                self.fails += 1
+
+                # Learn the new entry
+                new_register = self.Register(entry, class_value)
+                new_register.hits += 1
+                self.descriptor.append(new_register)
+                learned = True
+
+                # Updates the frequency data
+                frequency_data[class_value] += 1
+
+            # Updates the processed instances counter
+            processed_instances += 1
+
+            # Size of the search space
+            # If we just appended a new entry, ignore it
+            descriptor_size = len(self.descriptor)
+            if learned:
+                descriptor_size -= 1
+
+            # Update all registers in range
+            i = 0
+            while i < descriptor_size:
+                register = self.descriptor[i]
+
+                # Similarity of the register used as the best "acceptable"
+                outer_similarity = best_acceptable[1]
+                similarity = similarity_table[register.id]
+
+                if similarity >= outer_similarity:
+                    category = register.category
+
+                    # Update the current register
+                    if category == class_value:
+                        register.hits += 1
+                    else:
+                        register.fails += 1
+
+                    # discard factor
+                    z = 0.75
+
+                    # Calculates the frequency interval (class)
+                    p = frequency_data[category] / len(self.descriptor)
+                    n = processed_instances
+                    frequency_interval = self.interval(p, z, n)
+
+                    # Calculates the precision interval (instance)
+                    n = register.hits + register.fails
+                    p = register.hits / n
+                    precision_interval = self.interval(p, z, n)
+
+                    if precision_interval["sup"] < frequency_interval["inf"]:
+                        # Discard the instance
+                        del self.descriptor[i]
+                        descriptor_size -= 1
+                        frequency_data[category] -= 1
+                        dropped_instances += 1
+                        i -= 1
+                i += 1
+
+            # Iterates over the attributes, updating its weights
+            if len(self.descriptor) > 0:
+                reference = best_acceptable[0]
+                category = reference.category
+                for i in range(len(reference.entry)):
+                    if not self.both_known(entry[i], reference.entry[i]):
+                        continue
+
+                    delta = abs(entry[i] - reference.entry[i])
+
+                    lambd = max(frequency_data[class_value], frequency_data[category])
+                    lambd /= len(self.descriptor)
+                    complement = 1 - lambd
+                    if class_value == reference.entry[i]:
+                        accumulated_weights[i] += complement * (1 - delta)
+                    else:
+                        accumulated_weights[i] += complement * delta
+                    normalized_weights[i] += complement
+
+                    acc = accumulated_weights[i]
+                    norm = normalized_weights[i]
+                    if norm == 0:
+                        print("lambd = %s, comp = %s" % (lambd, complement))
+                    weights[i] = max(0, acc / norm - 0.5)
+
+        print("Dropped: %s" % (dropped_instances))
+
+        for i in range(len(self.descriptor)):
+            self.categories.append(self.descriptor[i].category)
+            self.descriptor[i] = self.descriptor[i].entry
+
+    def weighted_similarity(self, first, second, weights):
+        result = 0
+        for i in range(len(first)):
+            if self.both_known(first[i], second[i]):
+                dif = first[i] - second[i]
+            else:
+                dif = 0
+            result += (weights[i] * dif) ** 2
+        return -math.sqrt(result)
+
+    def both_known(self, first, second):
+        return first != "" and second != ""
+
+    def prepare(self, entry, class_index=-1):
+        return (utils.without_column(entry, class_index), entry[class_index])
+
+    def interval(self, p, z, n):
+        d = (1 + (z * z) / n)
+        f1 = p + (z * z) / (2 * n)
+        f2 = z * math.sqrt(p * (1 - p) / n + (z * z) / (4 * n * n))
+        return {
+            "inf": (f1 - f2) / d,
+            "sup": (f1 + f2) / d
+        }
+
