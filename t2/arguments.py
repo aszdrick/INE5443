@@ -5,6 +5,11 @@ parser = argparse.ArgumentParser(description="Classify some data")
 parser.add_argument("-k", "--knn", type=int, default=1, metavar="NUMBER", help="Use the k nearest neighbors to classify data")
 parser.add_argument("-s", "--show", action="store_true", help="Show the classified patterns (only works with 2D data)")
 
+parser.add_argument("-zpa", "--z_precision_acceptance", type=float, default=0.9, help="z-Value for Acceptance Precision Interval")
+parser.add_argument("-zpd", "--z_precision_dropping", type=float, default=0.75, help="z-Value for Dropping Precision Interval")
+parser.add_argument("-zfa", "--z_frequency_acceptance", type=float, default=0.9, help="z-Value for Acceptance Frquency Interval")
+parser.add_argument("-zfd", "--z_frequency_dropping", type=float, default=0.75, help="z-Value for Dropping Frquency Interval")
+
 parser.add_argument("algorithm", choices=["IB1", "IB2", "IB3", "IB4"], help="Classification algorithm")
 
 dataparsers = parser.add_subparsers(help="Specify type of data to be classified", dest="data_type")

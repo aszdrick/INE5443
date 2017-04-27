@@ -135,11 +135,14 @@ class IBL2(Classifier):
 
 class IBL3(Classifier):
     class Register:
+        counter = 0
         def __init__(self, entry, category):
+            self.id = self.counter
             self.category = category
             self.entry = entry
             self.hits = 0
             self.fails = 0
+            self.counter += 1
 
     def __init__(self, training_set, class_index=-1):
         super(IBL3, self).__init__()
@@ -173,7 +176,7 @@ class IBL3(Classifier):
 
                 # Populates the similarity table
                 similarity = -euclidian_dist(entry, register.entry)
-                similarity_table[tuple(register.entry)] = similarity
+                similarity_table[register.id] = similarity
 
                 # classifying acceptability factor
                 z = 0.9
@@ -198,7 +201,7 @@ class IBL3(Classifier):
                 # so use a random register instead
                 random_register = self.pick_one(self.descriptor)
 
-                similarity = similarity_table[tuple(random_register.entry)]
+                similarity = similarity_table[random_register.id]
                 best_acceptable = (random_register, similarity)
 
             # Flag that indicates if we learned a new entry
@@ -239,7 +242,7 @@ class IBL3(Classifier):
 
                 # Similarity of the register used as the best "acceptable"
                 outer_similarity = best_acceptable[1]
-                similarity = similarity_table[tuple(register.entry)]
+                similarity = similarity_table[register.id]
 
                 if similarity >= outer_similarity:
                     category = register.category
@@ -294,11 +297,14 @@ class IBL3(Classifier):
 
 class IBL4(Classifier):
     class Register:
+        counter = 0
         def __init__(self, entry, category):
+            self.id = self.counter
             self.category = category
             self.entry = entry
             self.hits = 0
             self.fails = 0
+            self.counter += 1
 
     def __init__(self, training_set, class_index=-1):
         super(IBL4, self).__init__()
@@ -348,7 +354,7 @@ class IBL4(Classifier):
 
                 # Populates the similarity table
                 similarity = self.weighted_similarity(entry, register.entry, weights)
-                similarity_table[tuple(register.entry)] = similarity
+                similarity_table[register.id] = similarity
 
                 # classifying acceptability factor
                 z = 0.9
@@ -375,7 +381,7 @@ class IBL4(Classifier):
                 # so use a random register instead
                 random_register = self.pick_one(self.descriptor)
 
-                similarity = similarity_table[tuple(random_register.entry)]
+                similarity = similarity_table[random_register.id]
                 best_acceptable = (random_register, similarity)
 
             # Flag that indicates if we learned a new entry
@@ -413,7 +419,7 @@ class IBL4(Classifier):
 
                 # Similarity of the register used as the best "acceptable"
                 outer_similarity = best_acceptable[1]
-                similarity = similarity_table[tuple(register.entry)]
+                similarity = similarity_table[register.id]
 
                 # TODO: should this inequality be strict?
                 if similarity > outer_similarity:
