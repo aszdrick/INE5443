@@ -72,10 +72,10 @@ def classify_spiral(args):
         "algorithm": args.algorithm,
         "category": 2,
         "k": args.knn if "knn" in args else 1,
-        "zpa": args.z_precision_acceptance,
-        "zpd": args.z_precision_dropping,
-        "zfa": args.z_frequency_acceptance,
-        "zfd": args.z_frequency_dropping,
+        "zpa": args.zpa,
+        "zpd": args.zpd,
+        "zfa": args.zfa,
+        "zfd": args.zfd,
     }
     output = core.IBL(training_set, test_set, data, **params)
     core.save_spirals(training_set, output, args.output, size, args.show)
