@@ -48,10 +48,10 @@ def classify_dataset(args):
         "algorithm": args.algorithm,
         "category": args.category,
         "k": args.knn if "knn" in args else 1,
-        "zpa": args.zpa,
-        "zpd": args.zpd,
-        "zfa": args.zfa,
-        "zfd": args.zfd,
+        "zpa": args.zpa if "zpa" in args else 0,
+        "zpd": args.zpd if "zpd" in args else 0,
+        "zfa": args.zfa if "zfa" in args else 0,
+        "zfd": args.zfd if "zfd" in args else 0,
     }
     output = core.IBL(training_set, test_set, data, **params)
 
@@ -72,10 +72,10 @@ def classify_spiral(args):
         "algorithm": args.algorithm,
         "category": 2,
         "k": args.knn if "knn" in args else 1,
-        "zpa": args.zpa,
-        "zpd": args.zpd,
-        "zfa": args.zfa,
-        "zfd": args.zfd,
+        "zpa": args.zpa if "zpa" in args else 0,
+        "zpd": args.zpd if "zpd" in args else 0,
+        "zfa": args.zfa if "zfa" in args else 0,
+        "zfd": args.zfd if "zfd" in args else 0,
     }
     output = core.IBL(training_set, test_set, data, **params)
     core.save_spirals(training_set, output, args.output, size, args.show)
