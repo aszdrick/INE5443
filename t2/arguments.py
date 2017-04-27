@@ -25,10 +25,10 @@ spiral.add_argument("-n", "--noise", type=int, default=0, help="Noise for the sp
 spiral.add_argument("-o", "--output", type=str, default="out", metavar="FILE", help="Save classified data as <FILE>.png")
 
 zargs = argparse.ArgumentParser(add_help=False)
-zargs.add_argument("-zpa", "--z_precision_acceptance", type=float, default=0.9, metavar="FLOAT", help="z-Value for Acceptance Precision Interval")
-zargs.add_argument("-zpd", "--z_precision_dropping", type=float, default=0.75, metavar="FLOAT", help="z-Value for Dropping Precision Interval")
-zargs.add_argument("-zfa", "--z_frequency_acceptance", type=float, default=0.9, metavar="FLOAT", help="z-Value for Acceptance Frquency Interval")
-zargs.add_argument("-zfd", "--z_frequency_dropping", type=float, default=0.75, metavar="FLOAT", help="z-Value for Dropping Frquency Interval")
+zargs.add_argument("-zpa", "--z_precision_acceptance", dest="zpa", type=float, default=0.9, metavar="FLOAT", help="z-Value for Acceptance Precision Interval")
+zargs.add_argument("-zpd", "--z_precision_dropping", dest="zpd", type=float, default=0.75, metavar="FLOAT", help="z-Value for Dropping Precision Interval")
+zargs.add_argument("-zfa", "--z_frequency_acceptance", dest="zfa", type=float, default=0.9, metavar="FLOAT", help="z-Value for Acceptance Frquency Interval")
+zargs.add_argument("-zfd", "--z_frequency_dropping", dest="zfd", type=float, default=0.75, metavar="FLOAT", help="z-Value for Dropping Frquency Interval")
 
 kdargs = argparse.ArgumentParser(add_help=False)
 kdargs.add_argument("-k", "--knn", type=int, default=1, metavar="NUMBER", help="Use the k nearest neighbors to classify data")
@@ -38,7 +38,7 @@ parser = argparse.ArgumentParser(description="Instance-based Learning classifica
 algparsers = parser.add_subparsers(help="Classification algorithm", dest="algorithm")
 algparsers.required = True
 
-ib1 = algparsers.add_parser("IB1", parents=[common, kdargs])
-ib2 = algparsers.add_parser("IB2", parents=[common, kdargs])
-ib3 = algparsers.add_parser("IB3", parents=[common, kdargs, zargs])
-ib4 = algparsers.add_parser("IB4", parents=[common, zargs])
+ib1 = algparsers.add_parser("IB1", parents=[kdargs, common])
+ib2 = algparsers.add_parser("IB2", parents=[kdargs, common])
+ib3 = algparsers.add_parser("IB3", parents=[kdargs, zargs, common])
+ib4 = algparsers.add_parser("IB4", parents=[zargs, common])
