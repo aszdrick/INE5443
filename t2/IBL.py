@@ -70,7 +70,7 @@ class Classifier:
 
 
 class IBL1(Classifier):
-    def __init__(self, training_set, class_index=-1):
+    def __init__(self, training_set, class_index=-1, params={}):
         super(IBL1, self).__init__()
         self.on_classify = kdtree_classify
 
@@ -102,7 +102,7 @@ class IBL1(Classifier):
         self.descriptor = KDTree(np.array(self.descriptor))
 
 class IBL2(Classifier):
-    def __init__(self, training_set, class_index=-1):
+    def __init__(self, training_set, class_index=-1, params={}):
         super(IBL2, self).__init__()
         if len(self.descriptor) == 0:
             self.add_random_entry(training_set)
@@ -144,7 +144,7 @@ class IBL3(Classifier):
             self.fails = 0
             self.counter += 1
 
-    def __init__(self, training_set, class_index=-1):
+    def __init__(self, training_set, class_index=-1, params={}):
         super(IBL3, self).__init__()
         self.on_classify = kdtree_classify
 
@@ -178,18 +178,19 @@ class IBL3(Classifier):
                 similarity = -euclidian_dist(entry, register.entry)
                 similarity_table[register.id] = similarity
 
-                # classifying acceptability factor
-                z = 0.9
+                # classifying acceptability factors
+                zf = params["zfa"]
+                zp = params["zpa"]
 
                 # Calculates the frequency interval (class)
                 p = frequency_data[category] / len(self.descriptor)
                 n = processed_instances
-                frequency_interval = self.interval(p, z, n)
+                frequency_interval = self.interval(p, zf, n)
 
                 # Calculates the precision interval (instance)
                 n = register.hits + register.fails
                 p = register.hits / n
-                precision_interval = self.interval(p, z, n)
+                precision_interval = self.interval(p, zp, n)
 
                 if frequency_interval["sup"] < precision_interval["inf"]:
                     # Accept the instance
@@ -254,17 +255,18 @@ class IBL3(Classifier):
                         register.fails += 1
 
                     # discard factor
-                    z = 0.75
+                    zf = params["zfd"]
+                    zp = params["zpd"]
 
                     # Calculates the frequency interval (class)
                     p = frequency_data[category] / len(self.descriptor)
                     n = processed_instances
-                    frequency_interval = self.interval(p, z, n)
+                    frequency_interval = self.interval(p, zf, n)
 
                     # Calculates the precision interval (instance)
                     n = register.hits + register.fails
                     p = register.hits / n
-                    precision_interval = self.interval(p, z, n)
+                    precision_interval = self.interval(p, zp, n)
 
                     if precision_interval["sup"] < frequency_interval["inf"]:
                         # Discard the instance
@@ -306,7 +308,7 @@ class IBL4(Classifier):
             self.fails = 0
             self.counter += 1
 
-    def __init__(self, training_set, class_index=-1):
+    def __init__(self, training_set, class_index=-1, params={}):
         super(IBL4, self).__init__()
         self.on_classify = classify
 
@@ -354,18 +356,19 @@ class IBL4(Classifier):
                 similarity = self.weighted_similarity(entry, register.entry, weights)
                 similarity_table[register.id] = similarity
 
-                # classifying acceptability factor
-                z = 0.9
+                # classifying acceptability factors
+                zf = params["zfa"]
+                zp = params["zpa"]
 
                 # Calculates the frequency interval (class)
                 p = frequency_data[category] / len(self.descriptor)
                 n = processed_instances
-                frequency_interval = self.interval(p, z, n)
+                frequency_interval = self.interval(p, zf, n)
 
                 # Calculates the precision interval (instance)
                 n = register.hits + register.fails
                 p = register.hits / n
-                precision_interval = self.interval(p, z, n)
+                precision_interval = self.interval(p, zp, n)
 
                 if frequency_interval["sup"] < precision_interval["inf"]:
                     # Accept the instance
@@ -427,17 +430,18 @@ class IBL4(Classifier):
                         register.fails += 1
 
                     # discard factor
-                    z = 0.75
+                    zf = params["zfd"]
+                    zp = params["zpd"]
 
                     # Calculates the frequency interval (class)
                     p = frequency_data[category] / len(self.descriptor)
                     n = processed_instances
-                    frequency_interval = self.interval(p, z, n)
+                    frequency_interval = self.interval(p, zf, n)
 
                     # Calculates the precision interval (instance)
                     n = register.hits + register.fails
                     p = register.hits / n
-                    precision_interval = self.interval(p, z, n)
+                    precision_interval = self.interval(p, zp, n)
 
                     if precision_interval["sup"] < frequency_interval["inf"]:
                         # Discard the instance
@@ -466,8 +470,6 @@ class IBL4(Classifier):
 
                     acc = accumulated_weights[i]
                     norm = normalized_weights[i]
-                    if norm == 0:
-                        print("lambd = %s, comp = %s" % (lambd, complement))
                     weights[i] = max(0, acc / norm - 0.5)
 
         print("Dropped: %s" % (dropped_instances))
@@ -505,7 +507,7 @@ class IBL5(Classifier):
             self.fails = 0
             self.counter += 1
 
-    def __init__(self, training_set, class_index=-1):
+    def __init__(self, training_set, class_index=-1, params={}):
         super(IBL5, self).__init__()
         self.on_classify = classify
 
@@ -553,18 +555,19 @@ class IBL5(Classifier):
                 similarity = self.weighted_similarity(entry, register.entry, weights)
                 similarity_table[register.id] = similarity
 
-                # classifying acceptability factor
-                z = 0.9
+                # classifying acceptability factors
+                zf = params["zfa"]
+                zp = params["zpa"]
 
                 # Calculates the frequency interval (class)
                 p = frequency_data[category] / len(self.descriptor)
                 n = processed_instances
-                frequency_interval = self.interval(p, z, n)
+                frequency_interval = self.interval(p, zf, n)
 
                 # Calculates the precision interval (instance)
                 n = register.hits + register.fails
                 p = register.hits / n
-                precision_interval = self.interval(p, z, n)
+                precision_interval = self.interval(p, zp, n)
 
                 if frequency_interval["sup"] < precision_interval["inf"]:
                     # Accept the instance
@@ -626,17 +629,18 @@ class IBL5(Classifier):
                         register.fails += 1
 
                     # discard factor
-                    z = 0.75
+                    zf = params["zfd"]
+                    zp = params["zpd"]
 
                     # Calculates the frequency interval (class)
                     p = frequency_data[category] / len(self.descriptor)
                     n = processed_instances
-                    frequency_interval = self.interval(p, z, n)
+                    frequency_interval = self.interval(p, zf, n)
 
                     # Calculates the precision interval (instance)
                     n = register.hits + register.fails
                     p = register.hits / n
-                    precision_interval = self.interval(p, z, n)
+                    precision_interval = self.interval(p, zp, n)
 
                     if precision_interval["sup"] < frequency_interval["inf"]:
                         # Discard the instance
@@ -668,8 +672,6 @@ class IBL5(Classifier):
 
                     acc = accumulated_weights[i]
                     norm = normalized_weights[i]
-                    if norm == 0:
-                        print("lambd = %s, comp = %s" % (lambd, complement))
                     weights[i] = max(0, acc / norm - 0.5)
 
         print("Dropped: %s" % (dropped_instances))

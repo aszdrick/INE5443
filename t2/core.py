@@ -99,7 +99,12 @@ def IBL(training_set, test_set, data, **kargs):
         "IB5": IBL5,
     }
 
-    classifier = algorithms[kargs["algorithm"]](training_set, kargs["category"])
+    classifier = algorithms[kargs["algorithm"]](training_set, kargs["category"], {
+        "zpa": kargs["zpa"],
+        "zpd": kargs["zpd"],
+        "zfa": kargs["zfa"],
+        "zfd": kargs["zfd"],
+    })
 
     print("Training statistics:")
     print("Hits: %i" % (classifier.hits))
