@@ -10,7 +10,7 @@
 % x = irisInputs;
 % t = irisTargets;
 x = X;
-t = y;
+t = Y;
 
 % Choose a Training Function
 % For a list of all training functions type: help nntrain
@@ -20,13 +20,17 @@ t = y;
 trainFcn = 'trainscg';  % Scaled conjugate gradient backpropagation.
 
 % Create a Pattern Recognition Network
-hiddenLayerSize = 25;
+hiddenLayerSize = [25 10];
 net = patternnet(hiddenLayerSize, trainFcn);
 
 % Setup Division of Data for Training, Validation, Testing
 net.divideParam.trainRatio = 0.70;
 net.divideParam.valRatio = 0.15;
 net.divideParam.testRatio = 0.15;
+
+net.trainParam.max_fail = 15;
+net.layers{1}.transferFcn = 'tansig';
+net.layers{2}.transferFcn = 'tansig';
 
 % Train the Network
 [net,tr] = train(net,x,t);
@@ -38,6 +42,8 @@ performance = perform(net,t,y)
 tind = vec2ind(t);
 yind = vec2ind(y);
 percentErrors = sum(tind ~= yind)/numel(tind);
+percentCorrect = 1 - percentErrors;
+fprintf('Percent correct: %.2f%%\n', percentCorrect * 100);
 
 % View the Network
 view(net)
