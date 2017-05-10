@@ -30,10 +30,6 @@ end
 X = transpose(X);
 Y = transpose(Y);
 
-%file = fopen("0.png", "rt");
-%content = fread(file);
-%content
-
 function result = normalize_dataset(dataset)
     dimensions = size(dataset);
     num_rows = dimensions(1,1);
