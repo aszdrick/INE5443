@@ -7,13 +7,14 @@
 num_classes = 3;
 train_percent = 0.75;
 
-% ------ Network construction ------
-x = csvread("datasets/generoIris.csv", 1, 0)';
+% ------ Dataset construction ------
+x = csvread("datasets/generoIris.csv", 1, 0)'; % ignores the first row
 dimensions = size(x);
-num_values = dimensions(1);
-num_samples = dimensions(2);
-x = x(:,randperm(num_samples));
+num_values = dimensions(1); % one parameter value per row
+num_samples = dimensions(2); % one sample per column
+x = x(:,randperm(num_samples)); % shuffles the samples
 
+% ------ Training/test set construction ------
 training_boundary = int64(num_samples * train_percent);
 training_set = x(:,1:training_boundary);
 
