@@ -4,7 +4,7 @@
 %
 
 % ------ Dataset construction ------
-x = csvread("datasets/animais.csv");
+x = csvread('datasets/animais.csv');
 
 % Create a Self-Organizing Map
 dimension1 = 10;

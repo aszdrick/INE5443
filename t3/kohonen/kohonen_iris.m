@@ -5,13 +5,14 @@
 %vec2ind(y)
 
 % ------ Dataset construction ------
-x = csvread("datasets/generoIris.csv", 1, 0)'; % ignores the first row
+x = csvread('datasets/generoIris.csv', 1, 0)'; % ignores the first row
 
 % -------- Network parameters --------
 params = struct(...
     'csv_data', x,...
     'num_classes', 3,...
-    'train_percent', 0.75...
+    'train_percent', 0.75,...
+    'dimensions', [10 10]...
 );
 
 [y, net] = kohonen(params);
@@ -50,14 +51,33 @@ function [y, net] = kohonen(params)
     training_set = csv_data(:,1:training_boundary);
 
     test_set = csv_data(:,(training_boundary + 1):end);
+    test_set_classes = test_set((num_values + 1 - num_classes):end,:)';
     test_set((num_values + 1 - num_classes):end,:) = 0;
 
     % ------ Self-Organizing Map construction ------
-    net = selforgmap(som_dimensions, 100, 3, 'gridtop');
+    net = selforgmap(som_dimensions, 100, 3, 'hextop');
 
     % Train the Network
     [net,tr] = train(net,training_set);
 
     % Test the Network
     y = net(test_set);
+
+    indexes = vec2ind(y);
+    levels = net.IW{1,1};
+    counter = 1;
+    hits = 0;
+    for index = indexes
+        level = levels(index, (num_values + 1 - num_classes):end);
+        [, predicted_index] = max(level);
+        [, class_index] = max(test_set_classes(counter,:));
+        if (predicted_index == class_index)
+            hits = hits + 1;
+        end
+        counter = counter + 1;
+    end
+    fails = counter - 1 - hits;
+    fprintf('Hits: %d\n', hits);
+    fprintf('Fails: %d\n', fails);
+    fprintf('Precision: %3.2f%%\n', 100 * hits/(hits + fails));
 end
