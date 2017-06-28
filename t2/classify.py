@@ -53,7 +53,7 @@ def classify_dataset(args):
         "zfa": args.zfa if "zfa" in args else 0,
         "zfd": args.zfd if "zfd" in args else 0,
     }
-    output = core.IBL(training_set, test_set, data, **params)
+    (output, classifier) = core.IBL(training_set, test_set, data, **params)
 
     if len(output[1]) > 0:
         utils.save_csv(args.output, [header] + output[1])
@@ -77,8 +77,14 @@ def classify_spiral(args):
         "zfa": args.zfa if "zfa" in args else 0,
         "zfd": args.zfd if "zfd" in args else 0,
     }
-    output = core.IBL(training_set, test_set, data, **params)
-    core.save_spirals(training_set, output, args.output, size, args.show)
+    (output, classifier) = core.IBL(training_set, test_set, data, **params)
+
+    if args.algorithm == "IB3":
+        descriptor = classifier.descriptor.data
+    else:
+        descriptor = classifier.descriptor
+
+    core.save_spirals(training_set, output, args.output, size, args.show, descriptor, classifier.dropped)
 
 def main():
     args = parser.parse_args()

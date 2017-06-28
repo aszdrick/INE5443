@@ -1,0 +1,33 @@
+Name,Complexity,Domain,Goal,Is Recursive,Is Deterministic,Complexity Class,Input Domain,Output Domain
+Topological Sort,O(|V| + |E|),Graph Theory,Sort,no,yes,P,graph,list of vertexes
+Dijkstra's Algorithm,O(|E| + |V|.log |V|),Graph Theory,Minimization,no,yes,P,graph,path
+Floyd-Warshall Algorithm,O(|V|)^3),Graph Theory,Minimization,no,yes,P,graph,list of paths
+Travelling salesman problem,O(n^2.2^n),Graph Theory,Minimization,no,yes,NP-hard,graph,path
+Kruskal's Algorithm,O(|E|.log |V|),Graph Theory,Minimization,no,yes,P,graph,list of edges
+Prim's Algorithm,O(|V|^2);O(|E|.log |V|);O(|E| + |V|.log |V|),Graph Theory,Minimization,no,yes,P,graph,list of edges
+A*,O(b^d),Graph Theory,Minimization,no,yes,P,graph,path
+Breadth-first search,O(b^d),Graph Theory,Minimization,no,yes,P,graph,path
+Depth-first search,O(b^d),Graph Theory,Minimization,no,yes,P,graph,path
+Hamiltonian Path,O(1.657^n),Graph Theory,Coverage,no,yes,NP-complete,graph,path
+Clique Problem,O(3^(n/3)),Graph Theory,Decomposition,no,yes,NP-complete,graph,list of subgraphs
+Bubble Sort,O(n^2),Sorting,Sort,no,yes,P,list,list
+Quicksort,O(n log n),Sorting,Sort,yes,yes,P,list,list
+Introsort,O(n log n),Sorting,Sort,yes,yes,P,list,list
+Insertion Sort,O(n^2),Sorting,Sort,yes,yes,P,list,list
+Merge Sort,O(n log n),Sorting,Sort,yes,yes,P,list,list
+Heapsort,O(n log n),Sorting,Sort,no,yes,P,list,list
+AKS,O(log^(21/2) n),Number Theory,Primality test,no,yes,P,positive integer,boolean
+Baillie-PSW,O(log^2 n.log log n.log log log n),Number Theory,Primality test,no,no,P,positive integer,boolean
+Fermat primality test,O(k.log^2 n.log log n.log log log n),Number Theory,Primality test,no,no,P,positive integer,boolean
+Lucas primality test,O(log n),Number Theory,Primality test,no,no,P,positive integer,boolean
+Miller-Rabin primality test,O(k.log^2 n.log log n.log log log n),Number Theory,Primality test,no,no,P,positive integer,boolean
+Schoolbook addition,O(n),Number Theory,Addition,no,yes,P,2 positive integers,positive integer
+Schoolbook subtraction,O(n),Number Theory,Subtraction,no,yes,P,2 positive integers,positive integer
+Long multiplication,O(n^2),Number Theory,Multiplication,no,yes,P,2 positive integers,positive integer
+Karatsuba,O(n^(log2(3))),Number Theory,Multiplication,yes,yes,P,2 positive integers,positive integer
+Schönhage-Strassen,O(n.log n.log log n),Number Theory,Multiplication,yes,yes,P,2 positive integers,positive integer
+Baby-step giant-step,O(sqrt(n)),Number Theory,Discrete Logarithm,no,yes,P,cyclic group,positive integer
+3SAT,O(2^(0.386n)),Logic,Expression Evaluation,no,yes,NP-complete,boolean expression,boolean
+Word Wrap Problem,O(n^2),Text Manipulation,Balancing,no,yes,P,list of words,list of lines
+Linear search,O(n),Searching,Search,no,yes,P,list,list element
+Binary search,O(log n),Searching,Search,no,yes,P,list,list element

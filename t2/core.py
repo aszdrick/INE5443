@@ -23,7 +23,7 @@ def plot(training_set, test_set, data, header, category):
         {categories[i]: allcolors[((i + 1) * 41) % len(allcolors)] for i in range(len(categories))}
     )
 
-def save_spirals(training_set, output, filename, size, show):
+def save_spirals(training_set, output, filename, size, show, descriptor=None, drops=None):
     colors = [utils.hex_to_tuple(x[2]) for x in output[1]]
 
     image.save(
@@ -43,6 +43,26 @@ def save_spirals(training_set, output, filename, size, show):
         path=filename + ".png",
         show=show
     )
+
+    if descriptor != None:
+        image.save(
+            positions=descriptor,
+            colors=[utils.hex_to_tuple("#00FF00") for x in descriptor],
+            width=size,
+            height=size,
+            path=filename + "_descriptor.png",
+            show=show
+        )
+
+    if drops != None:
+        image.save(
+            positions=drops,
+            colors=[utils.hex_to_tuple("#FF0000") for x in drops],
+            width=size,
+            height=size,
+            path=filename + "_drops.png",
+            show=show
+        )
 
 def process_spiral(spiral_type, size, noise):
     half = size / 2
@@ -118,7 +138,7 @@ def IBL(training_set, test_set, data, **kargs):
     if data:
         output[1] = classify(classifier, data, **kargs)
 
-    return output
+    return (output, classifier)
 
 def split_data(data, percentage):
     num_picked_entries = floor(len(data) * percentage / 100)

@@ -147,6 +147,7 @@ class IBL3(Classifier):
     def __init__(self, training_set, class_index=-1, params={}):
         super(IBL3, self).__init__()
         self.on_classify = kdtree_classify
+        self.dropped = []
 
         frequency_data = {}
         processed_instances = 0
@@ -270,6 +271,7 @@ class IBL3(Classifier):
 
                     if precision_interval["sup"] < frequency_interval["inf"]:
                         # Discard the instance
+                        self.dropped.append(self.descriptor[i].entry)
                         del self.descriptor[i]
                         descriptor_size -= 1
                         frequency_data[category] -= 1
@@ -311,6 +313,7 @@ class IBL4(Classifier):
     def __init__(self, training_set, class_index=-1, params={}):
         super(IBL4, self).__init__()
         self.on_classify = classify
+        self.dropped = []
 
         frequency_data = {}
         processed_instances = 0
@@ -445,6 +448,7 @@ class IBL4(Classifier):
 
                     if precision_interval["sup"] < frequency_interval["inf"]:
                         # Discard the instance
+                        self.dropped.append(self.descriptor[i].entry)
                         del self.descriptor[i]
                         descriptor_size -= 1
                         frequency_data[category] -= 1
@@ -473,6 +477,7 @@ class IBL4(Classifier):
                     weights[i] = max(0, acc / norm - 0.5)
 
         print("Dropped: %s" % (dropped_instances))
+        print("Weights: %s" % weights)
 
         for i in range(len(self.descriptor)):
             self.categories.append(self.descriptor[i].category)
@@ -510,6 +515,7 @@ class IBL5(Classifier):
     def __init__(self, training_set, class_index=-1, params={}):
         super(IBL5, self).__init__()
         self.on_classify = classify
+        self.dropped = []
 
         frequency_data = {}
         processed_instances = 0
@@ -644,6 +650,7 @@ class IBL5(Classifier):
 
                     if precision_interval["sup"] < frequency_interval["inf"]:
                         # Discard the instance
+                        self.dropped.append(self.descriptor[i].entry)
                         del self.descriptor[i]
                         descriptor_size -= 1
                         frequency_data[category] -= 1
