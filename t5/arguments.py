@@ -23,8 +23,8 @@ parser.add_argument(
 parser.add_argument(
     "-l",
     "--linkage",
-    choices=["complete", "mean", "nearest"],
-    default="mean",
+    choices=["complete", "average", "nearest"],
+    default="average",
     metavar="TYPE",
     help="Type of linkage to construct dendrogram"
 )
