@@ -1,4 +1,10 @@
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator
+
+linewidth = 1.5
+xoffset = 0.5
+color = "k"
+xgrid = False
 
 def visit_cluster(tree, labels, xticks, counter = 0):
     if isinstance(tree[0], tuple):
@@ -15,7 +21,11 @@ def visit_cluster(tree, labels, xticks, counter = 0):
     (ulx, uly) = (tree[2], bly)
     (urx, ury) = (tree[2], bry)
 
-    plt.plot([blx, ulx, urx, brx], [bly, uly, ury, bry], "k")
+    plt.plot(
+        [blx, ulx, urx, brx],
+        [bly, uly, ury, bry],
+        color,
+        linewidth = linewidth)
 
     xticks.append(tree[2])
 
@@ -26,10 +36,21 @@ def plot(tree):
     labels = []
     xticks = [0]
     
+    fig, ax = plt.subplots()
+
     visit_cluster(tree, labels, xticks)
 
-    plt.yticks(list(range(len(labels))), labels)
-    plt.xlim(0, max(xticks) + 1)
-    plt.xticks(xticks)
+    ml = MultipleLocator(xoffset)
+    ax.set_yticks(list(range(len(labels))))
+    ax.set_yticklabels(labels)
+    ax.set_xlim(0, max(xticks) + xoffset)
+    ax.set_xticks(xticks)
+    ax.xaxis.set_minor_locator(ml)
+    ax.yaxis.set_tick_params(width = linewidth)
+    
+    if xgrid:
+        ax.xaxis.grid()
 
-    plt.show()
+    fig.show()
+
+    return fig
