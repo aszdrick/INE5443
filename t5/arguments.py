@@ -1,5 +1,14 @@
 import argparse
 
+def interval(value):
+    ps = value.split("-")
+    if len(ps) != 2:
+        raise argparse.ArgumentParser()
+    pv = tuple(map(lambda s: int(s), ps))
+    if pv[0] > pv[1]:
+        raise argparse.ArgumentParser()
+    return pv
+
 parser = argparse.ArgumentParser(description="Tree Clustering data analyser")
 
 parser.add_argument(
@@ -27,4 +36,12 @@ parser.add_argument(
     default="average",
     metavar="TYPE",
     help="Type of linkage to construct dendrogram"
+)
+
+parser.add_argument(
+    "-m",
+    "--class_range",
+    type=interval,
+    metavar="MIN_VALUE-MAX_VALUE",
+    help="Minimum and maximum number of classes"
 )
