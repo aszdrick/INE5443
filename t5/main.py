@@ -60,9 +60,9 @@ def cluster_dist(first, second, linkage):
 
     if linkage == "complete":
         return max_dist
-    else if linkage == "nearest":
+    elif linkage == "nearest":
         return min_dist
-    else if linkage == "average":
+    elif linkage == "average":
         return avg_dist
 
     return None
@@ -73,15 +73,22 @@ def clusterize(dataset, linkage):
     for row in dataset:
         clusters.append([row])
 
-    num_clusters = len(clusters)
+    # num_clusters = len(clusters)
+    num_clusters = 5
     dist_matrix = [[0] * num_clusters] * num_clusters
     for first in range(num_clusters):
-        for second in range(num_clusters):
+        for second in range(first + 1, num_clusters):
             a = clusters[first]
             b = clusters[second]
             dist_matrix[first][second] = cluster_dist(a, b, linkage)
+            print("a = ", a)
+            print("b = ", b)
+            print("dist_matrix[%d][%d] = %d\n" % (first, second, dist_matrix[first][second]))
 
-    print(dist_matrix)
+    # print(dist_matrix)
+
+    for row in dist_matrix:
+        print(row)
 
 def main():
     args = parser.parse_args()
