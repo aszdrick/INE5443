@@ -1,6 +1,30 @@
 import argparse
 
-parser = argparse.ArgumentParser(description="Tree grouping data analyser")
+parser = argparse.ArgumentParser(description="Tree Clustering data analyser")
 
-parser.add_argument("-o", "--output", type=str, default="out", metavar="FILE", help="Save classified data as <FILE>.csv")
-parser.add_argument("-i", "--input", type=str, required=True, metavar="FILE", help="Filename of the dataset")
+parser.add_argument(
+    "-o",
+    "--output",
+    type=str,
+    default="out",
+    metavar="FILE",
+    help="Save classified data as <FILE>.csv"
+)
+
+parser.add_argument(
+    "-i",
+    "--input",
+    type=str,
+    required=True,
+    metavar="FILE",
+    help="Filename of the dataset"
+)
+
+parser.add_argument(
+    "-l",
+    "--linkage",
+    choices=["complete", "mean", "nearest"],
+    default="mean",
+    metavar="TYPE",
+    help="Type of linkage to construct dendrogram"
+)
