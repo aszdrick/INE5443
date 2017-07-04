@@ -19,8 +19,8 @@ class Classifier:
 
     def __call__(self, values):
         vs = []
-        vs.append(self.min_average / values[0])
-        vs.append(self.min_stddev / values[1])
+        vs.append(self.min_average / (values[0] + 1))
+        vs.append(self.min_stddev / (values[1] + 1))
         return sum([w * v for w, v in zip(self.weights, vs)])
 
 def __visit_cluster(tree, labels, xticks, counter = 0):
@@ -79,11 +79,11 @@ def plot(data):
     if xgrid:
         ax.xaxis.grid()
 
-def labels_of(tree):
+def __labels_of(tree):
     labels = []
     if isinstance(tree, tuple):
-        labels += labels_of(tree[0])
-        labels += labels_of(tree[1])
+        labels += __labels_of(tree[0])
+        labels += __labels_of(tree[1])
     else:
         labels.append(tree)
     return labels
@@ -96,19 +96,31 @@ def __levelize(tree, levels, counter = 0):
         levels[counter] = []
     levels[counter].append(tree)
 
-def __levels_of(tree):
+def __levels_of(tree, labels):
+    labels_set = set(labels)
     levels = {}
     __levelize(tree, levels)
+    for (i, level) in levels.items():
+        level_labels = set()
+        for t in level:
+            level_labels |= set(__labels_of(t))
+        diff = labels_set - level_labels
+        levels[i] += list(diff)
     return levels
 
 def __best_level(levels, weights, interval):
+    def get_distances(x):
+        if isinstance(x, tuple):
+            return x[2]
+        return 0
     score_it = Classifier(weights, interval)
     statistics = {}
     min_average = maxsize
     min_stddev = maxsize
 
     for (i, level) in levels.items():
-        distances = list(map((lambda x: x[2]), level))
+        distances = list(map(get_distances, level))
+        print(distances)
         groups = len(distances)
         xm = sum(distances) / groups
         stddev = math.sqrt(sum(map(lambda x: (x - xm) ** 2, distances)))
@@ -129,20 +141,24 @@ def __best_level(levels, weights, interval):
             best_score = score
             best_level = i
 
-    print(levels)
     print("best level is", best_level)
     print("best score is", best_score)
     return best_level
 
 def cut(tree, weights, interval):
-    labels = labels_of(tree)
-    levels = __levels_of(tree)
+    labels = __labels_of(tree)
+    levels = __levels_of(tree, labels)
     max_level = max(levels.keys())
+
+    for (i, level) in levels.items():
+        print("level", i)
+        print(level)
+        print("------------------------")
 
     for i in range(max_level + 1):
         level_labels = []
         for tup in levels[i]:
-            level_labels += labels_of(tup)
+            level_labels += __labels_of(tup)
         length = len(levels[i])
         if length > interval[1] or length < interval[0]:
             del levels[i]
