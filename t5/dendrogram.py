@@ -37,7 +37,8 @@ def __visit_cluster(tree, labels, xticks, counter = 0):
         color,
         linewidth = linewidth)
 
-    xticks.append(tree[2])
+    if tree[2] not in xticks:
+        xticks.append(tree[2])
 
     return (tree[2], (bottom_left[1] + bottom_right[1]) / 2)
 
