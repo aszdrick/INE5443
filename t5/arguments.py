@@ -45,3 +45,19 @@ parser.add_argument(
     metavar="MIN_VALUE-MAX_VALUE",
     help="Minimum and maximum number of classes"
 )
+
+parser.add_argument(
+    "-aw",
+    "--average_weight",
+    type=int,
+    default=1,
+    help="Mean/average weight"
+)
+
+parser.add_argument(
+    "-sw",
+    "--sd_weight",
+    type=int,
+    default=1,
+    help="Standard deviation weight"
+)

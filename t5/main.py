@@ -33,11 +33,14 @@ def analyse(data):
 # Normalizes a dataset
 def standardize(data):
     (averages, stdevs) = analyse(data)
-    for row in data:
+    result = []
+    for i in range(len(data)):
+        row = data[i]
+        result.append([])
         for index in range(len(row)):
-            row[index] = (row[index] - averages[index]) / stdevs[index]
+            result[i].append((row[index] - averages[index]) / stdevs[index])
 
-    return data
+    return result
 
 # Returns the euclidean distance between two entries
 def eucl_dist(first, second):
@@ -175,7 +178,7 @@ def clusterize(dataset, linkage):
     table_merge(dist_matrix, coords, linkage)
 
     size = len(dist_matrix)
-    # Continue merging until there is only one group
+    # Continue merging until there is only one cluster
     while size != 1:
         # Finds the minimum element in the distance matrix
         lowest = (1, 0)
@@ -207,16 +210,25 @@ def main():
     if len(dataset) == 0:
         parser.error("Invalid input: file does not exist or is empty.")
 
-    dataset = standardize(dataset)
-    dendrogram_info = clusterize(dataset, args.linkage)
-    # print("dendrogram_info:", dendrogram_info)
+    normalized = standardize(dataset)
+    dendrogram_info = clusterize(normalized, args.linkage)
 
-    plot(dendrogram_info)
+    fig = plot(dendrogram_info)
+    fig.savefig(args.output + "_full.png", format="png")
     plt.show()
 
-    trees = cut(dendrogram_info, [1, 0], [2, 10])
-    plot(trees)
+    weights = [args.average_weight, args.sd_weight]
+    trees = cut(dendrogram_info, weights, args.class_range)
+    fig = plot(trees)
+    fig.savefig(args.output + ".png", format="png")
     plt.show()
+
+    print("%d clusters were generated." % len(trees))
+    classified = [header + ["Classification"]]
+    clusters = get_groups(trees)
+    for i in range(len(dataset)):
+        classified.append(dataset[i] + [clusters[i]])
+    utils.save_csv(args.output + ".csv", classified)
 
 if __name__ == "__main__":
     main()
