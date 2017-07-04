@@ -52,18 +52,23 @@ def __visit_cluster(tree, labels, xticks, counter = 0):
 # def plot_twist(tree):
 #     labels = []
 #     xticks = [0]
-#     label_values = {}
+#     label_xs = {}
 
 #     for node in tree:
 #         if len(node[0]) == 1:
-#             label_values[node[0][0]] = len(labels)
+#             label_xs[node[0][0]] = len(labels)
 #             labels.append(node[0][0])
+#             (blx, bly) = (0, len(labels))
 #         else:
-
+#             values = [label_xs[l] for l in node[0]]
+#             blx = (max(values) + min(values)) / 2
 #         if len(node[1]) == 1:
-#             label_values[node[1][0]] = len(labels)
+#             label_xs[node[1][0]] = len(labels)
 #             labels.append(node[1][0])
+#             (brx, bry) = (0, len(labels))
 #         else:
+#             values = [label_xs[l] for l in node[1]]
+#             middle = (max(values) + min(values)) / 2
 
 
 # tree = (((A, B, dist), C, dist), )
@@ -169,11 +174,13 @@ def cut(tree, weights, interval, priority = None):
 
     trees = [tree]
     for i in range(chosen_level):
+        new_trees = []
         for j in range(len(trees)):
             if isinstance(trees[j], str):
+                new_trees.append(trees[j])
                 continue
-            trees.append(trees[j][0])
-            trees.append(trees[j][1])
-            del trees[j]
+            new_trees.append(trees[j][0])
+            new_trees.append(trees[j][1])
+        trees = new_trees
 
     return trees
