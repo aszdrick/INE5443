@@ -70,11 +70,32 @@ def __visit_cluster(tree, labels, xticks, counter = 0):
 #             values = [label_xs[l] for l in node[1]]
 #             middle = (max(values) + min(values)) / 2
 
-
-# tree = (((A, B, dist), C, dist), )
-def plot_trees(tree):
+def __plot_tree(tree)
     labels = []
     xticks = [0]
+
+    __visit_cluster(tree, labels, xticks)
+
+    return (labels, xticks)
+
+def __plot_subtrees(trees):
+    labels = []
+    xticks = [0]
+
+    for tree in trees:
+        if isinstance(tree, str):
+            labels.append(tree)
+        else:
+            __visit_cluster(tree, labels, xticks)
+    return (labels, xticks)
+
+
+# tree = (((A, B, dist), C, dist), )
+def plot(data):
+    if isinstance(data, list)
+        (labels, xticks) = __plot_subtrees(data)
+    else:
+        (labels, xticks) = __plot_tree(data)
 
     __visit_cluster(tree, labels, xticks)
 
@@ -89,29 +110,6 @@ def plot_trees(tree):
     
     if xgrid:
         ax.xaxis.grid()
-
-def plot_subtrees(trees):
-    labels = []
-    xticks = [0]
-
-    for tree in trees:
-        if isinstance(tree, str):
-            labels.append(tree)
-        else:
-            __visit_cluster(tree, labels, xticks)
-
-    ml = MultipleLocator(xoffset)
-    ax = plt.axes()
-    ax.set_yticks(list(range(len(labels))))
-    ax.set_yticklabels(labels)
-    ax.set_xlim(0, max(xticks) + xoffset)
-    ax.set_xticks(xticks)
-    ax.xaxis.set_minor_locator(ml)
-    ax.yaxis.set_tick_params(width = linewidth)
-    
-    if xgrid:
-        ax.xaxis.grid()
-
 
 def labels_of(tree):
     labels = []
@@ -194,11 +192,11 @@ def cut(tree, weights, interval, priority = None):
     for i in range(chosen_level):
         new_trees = []
         for j in range(len(trees)):
-            if isinstance(trees[j], str):
+            if isinstance(trees[j], tuple):
+                new_trees.append(trees[j][0])
+                new_trees.append(trees[j][1])
+            else:
                 new_trees.append(trees[j])
-                continue
-            new_trees.append(trees[j][0])
-            new_trees.append(trees[j][1])
         trees = new_trees
 
     return trees
