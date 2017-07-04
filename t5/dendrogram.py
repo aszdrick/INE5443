@@ -11,7 +11,7 @@ xgrid = False
 # class to encapsulate the fitness function, i.e.,
 # how good is a level using the specified set of weights and
 # interval.
-class Classifier:
+class LevelEvaluator:
     # weights = (size weight, average weight, stddev weight)
     def __init__(self, weights, interval):
         self.weights = weights
@@ -113,14 +113,13 @@ def __best_level(levels, weights, interval):
         if isinstance(x, tuple):
             return x[2]
         return 0
-    score_it = Classifier(weights, interval)
+    evaluator = LevelEvaluator(weights, interval)
     statistics = {}
     min_average = maxsize
     min_stddev = maxsize
 
     for (i, level) in levels.items():
         distances = list(map(get_distances, level))
-        print(distances)
         groups = len(distances)
         xm = sum(distances) / groups
         stddev = math.sqrt(sum(map(lambda x: (x - xm) ** 2, distances)))
@@ -130,30 +129,23 @@ def __best_level(levels, weights, interval):
         if stddev < min_stddev:
             min_stddev = stddev
 
-    score_it.min_average = min_average
-    score_it.min_stddev = min_stddev
+    evaluator.min_average = min_average
+    evaluator.min_stddev = min_stddev
     best_level = -1
     best_score = 0
 
     for (i, values) in statistics.items():
-        score = score_it(values)
+        score = evaluator(values)
         if score > best_score:
             best_score = score
             best_level = i
 
-    print("best level is", best_level)
-    print("best score is", best_score)
     return best_level
 
 def cut(tree, weights, interval):
     labels = __labels_of(tree)
     levels = __levels_of(tree, labels)
     max_level = max(levels.keys())
-
-    for (i, level) in levels.items():
-        print("level", i)
-        print(level)
-        print("------------------------")
 
     for i in range(max_level + 1):
         level_labels = []
@@ -177,3 +169,10 @@ def cut(tree, weights, interval):
         trees = new_trees
 
     return trees
+
+def get_groups(trees):
+    groups = {}
+    for i, tree in enumerate(trees):
+        for instance in __labels_of(tree):
+            groups[instance] = i
+    return groups
