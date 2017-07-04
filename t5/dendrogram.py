@@ -23,14 +23,14 @@ class Classifier:
         vs.append(self.min_stddev / values[2])
         return sum([w * v for w, v in zip(self.weights, vs)])
 
-def visit_cluster(tree, labels, xticks, counter = 0):
+def __visit_cluster(tree, labels, xticks, counter = 0):
     if isinstance(tree[0], tuple):
-        (blx, bly) = visit_cluster(tree[0], labels, xticks)
+        (blx, bly) = __visit_cluster(tree[0], labels, xticks)
     else:
         (blx, bly) = (0, len(labels))
         labels.append(tree[0])
     if isinstance(tree[1], tuple):
-        (brx, bry) = visit_cluster(tree[1], labels, xticks)
+        (brx, bry) = __visit_cluster(tree[1], labels, xticks)
     else:
         (brx, bry) = (0, len(labels))
         labels.append(tree[1])
@@ -48,6 +48,24 @@ def visit_cluster(tree, labels, xticks, counter = 0):
 
     return (tree[2], (bly + bry) / 2)
 
+
+# def plot_twist(tree):
+#     labels = []
+#     xticks = [0]
+#     label_values = {}
+
+#     for node in tree:
+#         if len(node[0]) == 1:
+#             label_values[node[0][0]] = len(labels)
+#             labels.append(node[0][0])
+#         else:
+
+#         if len(node[1]) == 1:
+#             label_values[node[1][0]] = len(labels)
+#             labels.append(node[1][0])
+#         else:
+
+
 # tree = (((A, B, dist), C, dist), )
 def plot(tree):
     labels = []
@@ -55,7 +73,7 @@ def plot(tree):
     
     fig, ax = plt.subplots()
 
-    visit_cluster(tree, labels, xticks)
+    __visit_cluster(tree, labels, xticks)
 
     ml = MultipleLocator(xoffset)
     ax.set_yticks(list(range(len(labels))))
@@ -68,7 +86,7 @@ def plot(tree):
     if xgrid:
         ax.xaxis.grid()
 
-    fig.show()
+    # fig.show()
 
     return fig
 
@@ -84,18 +102,18 @@ def labels_of(tree):
         labels.append(tree[1])
     return labels
 
-def levelize(tree, levels, counter = 0):
+def __levelize(tree, levels, counter = 0):
     if isinstance(tree[0], tuple):
-        levelize(tree[0], levels, counter + 1)
+        __levelize(tree[0], levels, counter + 1)
     if isinstance(tree[1], tuple):
-        levelize(tree[1], levels, counter + 1)
+        __levelize(tree[1], levels, counter + 1)
     if counter not in levels.keys():
         levels[counter] = []
     levels[counter].append(tree)
 
 def levels_of(tree):
     levels = {}
-    levelize(tree, levels)
+    __levelize(tree, levels)
     return levels
 
 def best_level(levels, weights, interval, priority):
@@ -143,16 +161,19 @@ def cut(tree, weights, interval, priority = None):
         for tup in levels[i]:
             level_labels += labels_of(tup)
         length = len(levels[i])
-        if len(level_labels) != len(labels)
-         or length > interval[1] or length < interval[0]:
+        # len(level_labels) != len(labels)
+        if length > interval[1] or length < interval[0]:
             del levels[i]
 
     chosen_level = best_level(levels, weights, interval, priority)
 
     trees = [tree]
     for i in range(chosen_level):
-        new_trees = []
-        for j in range(trees):
-            trees.append(trees[j][0], trees[j][1])
+        for j in range(len(trees)):
+            if isinstance(trees[j], str):
+                continue
+            trees.append(trees[j][0])
+            trees.append(trees[j][1])
             del trees[j]
-    
+
+    return trees
