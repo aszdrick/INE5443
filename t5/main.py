@@ -71,6 +71,7 @@ def distance_matrix(dataset):
     return (dist_matrix, min_dist)
     # return dist_matrix
 
+# Applies a linkage heuristic to two distances
 def apply_linkage(first, second, linkage):
     if linkage == "nearest":
         return min(first, second)
@@ -99,41 +100,29 @@ def table_merge(matrix, coords, linkage):
     order = len(matrix)
 
     # Merges the relevant cells
-    row = matrix[row_index]
     for i in range(order):
+        # Skips reflective comparisons
         if i != row_index and i != column_index:
-            # Skips reflective comparisons
-            # print("linkage(%d, %d)" % (row[i], matrix[column_index][i]))
-            row[i] = apply_linkage(row[i], matrix[row_index][i], linkage)
-            # row[row_index] = apply_linkage(row[row_index], row[column_index], linkage)
+            row = matrix[i]
+            # print("linkage(%d, %d)" % (row[row_index], row[column_index]))
+            row[row_index] = apply_linkage(row[row_index], row[column_index], linkage)
+            row[column_index] = apply_linkage(row[column_index], row[row_index], linkage)
 
-            r = matrix[i]
-            # print("linkage(%d, %d)" % (r[row_index], r[column_index]))
-            r[row_index] = apply_linkage(r[row_index], r[column_index], linkage)
-            r[column_index] = apply_linkage(r[column_index], r[row_index], linkage)
-
+    # Preserves symmetry
     for i in range(order):
         for j in range(i + 1, order):
             matrix[i][j] = matrix[j][i]
-
-    # print("After traversal:")
-    # pretty_print(matrix)
 
     highest = max(row_index, column_index)
     for i in range(order):
         del matrix[i][highest]
     del matrix[row_index]
 
-    # del matrix[row_index]
-    # for row in matrix:
-    #     del row[column_index]
-
     # print("After row/column removal:")
-    pretty_print(matrix)
+    # pretty_print(matrix)
 
 def clusterize(dataset, linkage):
     # (dist_matrix, coords) = distance_matrix(dataset)
-    # pretty_print(dist_matrix)
 
     dist_matrix = [
         [0, 2, 6, 10, 9],
@@ -144,21 +133,21 @@ def clusterize(dataset, linkage):
     ]
 
     coords = (3, 1)
-    # coords = (1, 0)
 
     labels = [[i] for i in range(len(dist_matrix))]
     # labels = [["A"], ["B"], ["C"], ["D"], ["E"]]
-    print("Labels:", labels)
+    # print("Labels:", labels)
     pretty_print(dist_matrix)
 
-    # merges = []
-    # merges.append((coords[0], coords[1], dist_matrix[coords[0]][coords[1]]))
-
     # print("dist_matrix:", dist_matrix)
-    # print("merge coords:", coords)
-    # print("min distance =", dist_matrix[coords[0]][coords[1]])
+    print("merge coords:", coords)
+    print("min distance =", dist_matrix[coords[0]][coords[1]])
 
-    tree = (labels[coords[0]], labels[coords[1]], dist_matrix[coords[0]][coords[1]])
+    merges = []
+    merges.append((labels[coords[0]][:], labels[coords[1]][:], dist_matrix[coords[0]][coords[1]]))
+    print("Merge list:", merges)
+
+    # tree = (labels[coords[0]], labels[coords[1]], dist_matrix[coords[0]][coords[1]])
     # print("Tree:", tree)
 
     labels[coords[1]] += labels[coords[0]]
@@ -175,12 +164,16 @@ def clusterize(dataset, linkage):
                 if dist_matrix[i][j] < dist_matrix[lowest[0]][lowest[1]]:
                     lowest = (i, j)
 
-        # print("------------------------")
+        min_dist = dist_matrix[lowest[0]][lowest[1]]
+
+        print("------------------------")
         # print("size:", size)
         # print("dist_matrix:", dist_matrix)
-        # print("merge coords:", lowest)
-        # print("min distance =", dist_matrix[lowest[0]][lowest[1]])
+        print("merge coords:", lowest)
+        print("min distance =", min_dist)
 
+        merges.append((labels[lowest[0]][:], labels[lowest[1]][:], min_dist))
+        print("Merge list:", merges)
         # tree = (labels[coords[0]], labels[coords[1]], dist_matrix[coords[0]][coords[1]])
         # print("Tree:", tree)
 
@@ -190,6 +183,10 @@ def clusterize(dataset, linkage):
 
         table_merge(dist_matrix, lowest, linkage)
         size = len(dist_matrix)
+
+    print("#########################")
+    print("Merge list:", merges)
+    print("Labels:", labels)
 
 def main():
     args = parser.parse_args()
