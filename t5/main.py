@@ -70,40 +70,29 @@ def distance_matrix(dataset):
 # elements according to a linkage heuristic
 def table_merge(matrix, coords, linkage):
     (row_index, column_index) = coords
-    (first_merged, second_merged) = coords
-
-    # Ensures that matrix[first_merged][second_merged] exists
-    # (note that equality is impossible)
-    if first_merged < second_merged:
-        (first_merged, second_merged) = (second_merged, first_merged)
-
-    # for i in range(len(matrix)):
-    #     for j in range(len(row)):
-    #         if i == row_index and j == column_index:
-    #             continue
 
     print(matrix)
     print(coords)
-    # Traverses through the longest row
-    # (the first row is empty)
-    if first_merged > 0:
-        row = matrix[first_merged]
-        print("len(row) =", len(row))
-        for index in range(min(len(row), column_index)):
+
+    # The matrix is always square
+    order = len(matrix)
+
+    # Traverses through the row
+    row = matrix[row_index]
+    print("len(row) =", len(row))
+    for index in range(order):
+        if index != row_index and index != column_index:
+            # Skips reflective comparisons
             print("index =", index)
+            print("min(%d, %d)\n" % (row[index], matrix[column_index][index]))
             row[index] = min(row[index], matrix[column_index][index]);
 
     print("After row traversal")
     print(matrix)
 
-    # Traverses through the longest column
-    # (the last column is empty)
-    if second_merged < len(matrix) - 1:
-        column = matrix[row_index]
-        print("len(column) =", len(column))
-        for index in range(min(len(column), column_index)):
-            print("index =", index)
-            column[index] = min(column[index], matrix[column_index][index]);
+    # Traverses through the column
+    # for i in range(order):
+    #     for j in range(matrix[i]):
 
     print("Merge Result")
     print(matrix)
@@ -112,11 +101,11 @@ def table_merge(matrix, coords, linkage):
 def clusterize(dataset, linkage):
     # (dist_matrix, coords) = distance_matrix(dataset)
     dist_matrix = [
-        [],
-        [2],
-        [6, 5],
-        [10, 1, 4],
-        [9, 8, 5, 3]
+        [0, 2, 6, 10, 9],
+        [2, 0, 5, 1, 8],
+        [6, 5, 0, 4, 5],
+        [10, 1, 4, 0, 3],
+        [9, 8, 5, 3, 0]
     ]
 
     # coords = (1, 0)
