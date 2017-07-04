@@ -83,10 +83,10 @@ def __plot_subtrees(trees):
     xticks = [0]
 
     for tree in trees:
-        if isinstance(tree, str):
-            labels.append(tree)
-        else:
+        if isinstance(tree, tuple):
             __visit_cluster(tree, labels, xticks)
+        else:
+            labels.append(tree)
     return (labels, xticks)
 
 
