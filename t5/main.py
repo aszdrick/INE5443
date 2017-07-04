@@ -225,7 +225,7 @@ def main():
 
     print("%d clusters were generated." % len(trees))
     classified = [header + ["Classification"]]
-    clusters = get_groups(trees)
+    clusters = get_clusters(trees)
     for i in range(len(dataset)):
         classified.append(dataset[i] + [clusters[i]])
     utils.save_csv(args.output + ".csv", classified)

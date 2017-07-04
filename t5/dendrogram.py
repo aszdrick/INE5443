@@ -123,8 +123,8 @@ def __best_level(levels, weights, interval):
 
     for (i, level) in levels.items():
         distances = list(map(get_distances, level))
-        groups = len(distances)
-        xm = sum(distances) / groups
+        clusters = len(distances)
+        xm = sum(distances) / clusters
         stddev = math.sqrt(sum(map(lambda x: (x - xm) ** 2, distances)))
         statistics[i] = (xm, stddev)
         if xm < min_average:
@@ -173,9 +173,9 @@ def cut(tree, weights, interval):
 
     return trees
 
-def get_groups(trees):
-    groups = {}
+def get_clusters(trees):
+    clusters = {}
     for i, tree in enumerate(trees):
         for instance in __labels_of(tree):
-            groups[instance] = i
-    return groups
+            clusters[instance] = i
+    return clusters
