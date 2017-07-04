@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from arguments import *
+from dendrogram import *
 import math
 import utils
 
@@ -121,38 +122,87 @@ def table_merge(matrix, coords, linkage):
     # print("After row/column removal:")
     # pretty_print(matrix)
 
+def remove_lists(merge_tuple):
+    (first, second, distance) = merge_tuple
+    if isinstance(first, tuple):
+        first = remove_lists(first)
+    else:
+        first = first[0]
+
+    if isinstance(second, tuple):
+        second = remove_lists(second)
+    else:
+        second = second[0]
+
+    return (first, second, distance)
+
+def tuple_format(merge_list):
+    mappings = {}
+    for merge in merge_list:
+        mappings[tuple(sorted(merge[0] + merge[1]))] = merge
+
+    # print("\nMappings:", mappings)
+
+    for index in range(len(merge_list)):
+        merge = merge_list[index]
+        (old_first, old_second, distance) = merge
+        (new_first, new_second) = (old_first, old_second)
+        if len(new_first) > 1:
+            new_first = mappings[tuple(sorted(new_first))]
+        if len(new_second) > 1:
+            new_second = mappings[tuple(sorted(new_second))]
+        # print("")
+        # print("Changed:", merge)
+        merge_list[index] = (new_first, new_second, distance)
+        # print("To:", merge_list[index])
+        # print("new_first:", new_first)
+        # print("new_second:", new_second)
+        mappings[tuple(sorted(list(old_first) + list(old_second)))] = merge_list[index]
+
+    result = merge_list[len(merge_list) - 1]
+
+    # print("")
+    # print("\nResult:", result)
+
+    for index in range(len(merge_list)):
+        (first, second, distance) = merge_list[index]
+        if isinstance(first, tuple):
+            first = first[0]
+        if isinstance(second, tuple):
+            second = second[0]
+        merge_list[index] = (first, second, distance)
+
+    # print("Without removal:", result)
+    return remove_lists(result)
+
 def clusterize(dataset, linkage):
-    # (dist_matrix, coords) = distance_matrix(dataset)
+    (dist_matrix, coords) = distance_matrix(dataset)
 
-    dist_matrix = [
-        [0, 2, 6, 10, 9],
-        [2, 0, 5, 1, 8],
-        [6, 5, 0, 4, 5],
-        [10, 1, 4, 0, 3],
-        [9, 8, 5, 3, 0]
-    ]
+    # dist_matrix = [
+    #     [0, 2, 6, 10, 9],
+    #     [2, 0, 5, 1, 8],
+    #     [6, 5, 0, 4, 5],
+    #     [10, 1, 4, 0, 3],
+    #     [9, 8, 5, 3, 0]
+    # ]
 
-    coords = (3, 1)
+    # coords = (3, 1)
 
     labels = [[i] for i in range(len(dist_matrix))]
     # labels = [["A"], ["B"], ["C"], ["D"], ["E"]]
     # print("Labels:", labels)
-    pretty_print(dist_matrix)
+    # pretty_print(dist_matrix)
 
-    # print("dist_matrix:", dist_matrix)
-    print("merge coords:", coords)
-    print("min distance =", dist_matrix[coords[0]][coords[1]])
+    # print("merge coords:", coords)
+    # print("min distance =", dist_matrix[coords[0]][coords[1]])
 
     merges = []
     merges.append((labels[coords[0]][:], labels[coords[1]][:], dist_matrix[coords[0]][coords[1]]))
-    print("Merge list:", merges)
-
-    # tree = (labels[coords[0]], labels[coords[1]], dist_matrix[coords[0]][coords[1]])
-    # print("Tree:", tree)
+    # print("Merge list:", merges)
 
     labels[coords[1]] += labels[coords[0]]
     del labels[coords[0]]
-    print("Labels:", labels)
+    # print("Labels:", labels)
 
     table_merge(dist_matrix, coords, linkage)
 
@@ -166,27 +216,25 @@ def clusterize(dataset, linkage):
 
         min_dist = dist_matrix[lowest[0]][lowest[1]]
 
-        print("------------------------")
-        # print("size:", size)
-        # print("dist_matrix:", dist_matrix)
-        print("merge coords:", lowest)
-        print("min distance =", min_dist)
+        # print("------------------------")
+        # print("merge coords:", lowest)
+        # print("min distance =", min_dist)
 
         merges.append((labels[lowest[0]][:], labels[lowest[1]][:], min_dist))
-        print("Merge list:", merges)
-        # tree = (labels[coords[0]], labels[coords[1]], dist_matrix[coords[0]][coords[1]])
-        # print("Tree:", tree)
+        # print("Merge list:", merges)
 
         labels[lowest[1]] += labels[lowest[0]]
         del labels[lowest[0]]
-        print("Labels:", labels)
+        # print("Labels:", labels)
 
         table_merge(dist_matrix, lowest, linkage)
         size = len(dist_matrix)
 
-    print("#########################")
-    print("Merge list:", merges)
-    print("Labels:", labels)
+    # print("#########################")
+    # print("Merge list:", merges)
+    # print("Labels:", labels)
+
+    return tuple_format(merges)
 
 def main():
     args = parser.parse_args()
@@ -195,7 +243,11 @@ def main():
         parser.error("Invalid input: file does not exist or is empty.")
 
     dataset = standardize(dataset)
-    dataset = clusterize(dataset, args.linkage)
+    dendrogram_info = clusterize(dataset, args.linkage)
+    # print("dendrogram_info:", dendrogram_info)
+
+    plot(dendrogram_info)
+    plt.show()
 
 if __name__ == "__main__":
     main()
