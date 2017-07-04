@@ -5,6 +5,7 @@ from dendrogram import *
 import math
 import utils
 
+# Returns the mean value and the standard deviation of a dataset
 def analyse(data):
     num_columns = len(data[0])
     sums = [0] * num_columns
@@ -29,6 +30,7 @@ def analyse(data):
 
     return (averages, stdevs)
 
+# Normalizes a dataset
 def standardize(data):
     (averages, stdevs) = analyse(data)
     for row in data:
@@ -46,7 +48,7 @@ def eucl_dist(first, second):
 
     return math.sqrt(result)
 
-# Returns a triangular matrix representing the distance
+# Returns a symmetric matrix representing the distance
 # between every pair of elements in the dataset
 def distance_matrix(dataset):
     num_entries = len(dataset)
@@ -54,23 +56,22 @@ def distance_matrix(dataset):
     min_dist = (1, 0)
 
     for first in range(num_entries):
-        # dist_matrix.append([])
         for second in range(0, first):
             a = dataset[first]
             b = dataset[second]
             distance = eucl_dist(a, b)
-            # dist_matrix[first].append(distance)
             dist_matrix[first][second] = distance
 
             if distance < dist_matrix[min_dist[0]][min_dist[1]]:
                 min_dist = (first, second)
 
+    # Fills the upper right corner of
+    # the matrix, preserving symmetry.
     for i in range(num_entries):
         for j in range(i + 1, num_entries):
             dist_matrix[i][j] = dist_matrix[j][i]
 
     return (dist_matrix, min_dist)
-    # return dist_matrix
 
 # Applies a linkage heuristic to two distances
 def apply_linkage(first, second, linkage):
@@ -82,20 +83,10 @@ def apply_linkage(first, second, linkage):
         return (first + second) / 2
     return None
 
-def pretty_print(matrix):
-    print("")
-    for row in matrix:
-        print(row)
-    print("")
-
 # Removes a row/column from a matrix, merging the remaining
 # elements according to a linkage heuristic
 def table_merge(matrix, coords, linkage):
     (row_index, column_index) = coords
-
-    # print("\nOriginal:")
-    # pretty_print(matrix)
-    # print("Coords:", coords)
 
     # The matrix is always square
     order = len(matrix)
@@ -105,7 +96,6 @@ def table_merge(matrix, coords, linkage):
         # Skips reflective comparisons
         if i != row_index and i != column_index:
             row = matrix[i]
-            # print("linkage(%d, %d)" % (row[row_index], row[column_index]))
             row[row_index] = apply_linkage(row[row_index], row[column_index], linkage)
             row[column_index] = apply_linkage(row[column_index], row[row_index], linkage)
 
@@ -114,14 +104,13 @@ def table_merge(matrix, coords, linkage):
         for j in range(i + 1, order):
             matrix[i][j] = matrix[j][i]
 
+    # Reduces the resulting distance matrix
     highest = max(row_index, column_index)
     for i in range(order):
         del matrix[i][highest]
     del matrix[row_index]
 
-    # print("After row/column removal:")
-    # pretty_print(matrix)
-
+# Turns all unary lists in a recursive tuple into scalars
 def remove_lists(merge_tuple):
     (first, second, distance) = merge_tuple
     if isinstance(first, tuple):
@@ -136,12 +125,14 @@ def remove_lists(merge_tuple):
 
     return (first, second, distance)
 
+# Transforms a merge list into a recursive tuple
 def tuple_format(merge_list):
+    # Stores a tuple -> tuple mapping representing
+    # which merge originated each tuple
     mappings = {}
+
     for merge in merge_list:
         mappings[tuple(sorted(merge[0] + merge[1]))] = merge
-
-    # print("\nMappings:", mappings)
 
     for index in range(len(merge_list)):
         merge = merge_list[index]
@@ -151,63 +142,42 @@ def tuple_format(merge_list):
             new_first = mappings[tuple(sorted(new_first))]
         if len(new_second) > 1:
             new_second = mappings[tuple(sorted(new_second))]
-        # print("")
-        # print("Changed:", merge)
+
         merge_list[index] = (new_first, new_second, distance)
-        # print("To:", merge_list[index])
-        # print("new_first:", new_first)
-        # print("new_second:", new_second)
+
         mappings[tuple(sorted(list(old_first) + list(old_second)))] = merge_list[index]
 
+    # The last element in the merge_list
+    # is completely unrolled
     result = merge_list[len(merge_list) - 1]
 
-    # print("")
-    # print("\nResult:", result)
-
-    for index in range(len(merge_list)):
-        (first, second, distance) = merge_list[index]
-        if isinstance(first, tuple):
-            first = first[0]
-        if isinstance(second, tuple):
-            second = second[0]
-        merge_list[index] = (first, second, distance)
-
-    # print("Without removal:", result)
+    # The resulting recursive tuple contains unary lists
+    # of elements, so turn them into scalars and return them
     return remove_lists(result)
 
+# Clusterizes a dataset according to a linkage heuristic,
+# returning a tree-like recursive tuple representing the
+# resulting dendrogram
 def clusterize(dataset, linkage):
     (dist_matrix, coords) = distance_matrix(dataset)
 
-    # dist_matrix = [
-    #     [0, 2, 6, 10, 9],
-    #     [2, 0, 5, 1, 8],
-    #     [6, 5, 0, 4, 5],
-    #     [10, 1, 4, 0, 3],
-    #     [9, 8, 5, 3, 0]
-    # ]
-
-    # coords = (3, 1)
-
     labels = [[i] for i in range(len(dist_matrix))]
-    # labels = [["A"], ["B"], ["C"], ["D"], ["E"]]
-    # print("Labels:", labels)
-    # pretty_print(dist_matrix)
 
-    # print("merge coords:", coords)
-    # print("min distance =", dist_matrix[coords[0]][coords[1]])
-
+    # Stores a list of all merges performed
     merges = []
     merges.append((labels[coords[0]][:], labels[coords[1]][:], dist_matrix[coords[0]][coords[1]]))
-    # print("Merge list:", merges)
 
+    # Glues the labels used in the first merge
     labels[coords[1]] += labels[coords[0]]
     del labels[coords[0]]
-    # print("Labels:", labels)
 
+    # Executes the first merge
     table_merge(dist_matrix, coords, linkage)
 
     size = len(dist_matrix)
+    # Continue merging until there is only one group
     while size != 1:
+        # Finds the minimum element in the distance matrix
         lowest = (1, 0)
         for i in range(size):
             for j in range(0, i):
@@ -216,24 +186,19 @@ def clusterize(dataset, linkage):
 
         min_dist = dist_matrix[lowest[0]][lowest[1]]
 
-        # print("------------------------")
-        # print("merge coords:", lowest)
-        # print("min distance =", min_dist)
-
+        # Registers a new merge where the minimum element is
         merges.append((labels[lowest[0]][:], labels[lowest[1]][:], min_dist))
-        # print("Merge list:", merges)
 
+        # Glues the labels used in the merge
         labels[lowest[1]] += labels[lowest[0]]
         del labels[lowest[0]]
-        # print("Labels:", labels)
 
+        # Executes the merge
         table_merge(dist_matrix, lowest, linkage)
         size = len(dist_matrix)
 
-    # print("#########################")
-    # print("Merge list:", merges)
-    # print("Labels:", labels)
-
+    # Transforms the resulting merge list into a
+    # tree-like recursive tuple and returns it
     return tuple_format(merges)
 
 def main():
@@ -247,6 +212,10 @@ def main():
     # print("dendrogram_info:", dendrogram_info)
 
     plot(dendrogram_info)
+    plt.show()
+
+    trees = cut(dendrogram_info, [1, 0], [2, 10])
+    plot(trees)
     plt.show()
 
 if __name__ == "__main__":
