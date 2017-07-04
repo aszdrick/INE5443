@@ -66,6 +66,15 @@ def distance_matrix(dataset):
     return (dist_matrix, min_dist)
     # return dist_matrix
 
+def apply_linkage(first, second, linkage):
+    if linkage == "nearest":
+        return min(first, second)
+    elif linkage == "complete":
+        return max(first, second)
+    elif linkage == "average":
+        return (first + second) / 2
+    return None
+
 # Removes a row/column from a matrix, merging the remaining
 # elements according to a linkage heuristic
 def table_merge(matrix, coords, linkage):
@@ -79,23 +88,26 @@ def table_merge(matrix, coords, linkage):
 
     # Merges the relevant cells
     row = matrix[row_index]
-    for index in range(order):
-        if index != row_index and index != column_index:
+    for i in range(order):
+        if i != row_index and i != column_index:
             # Skips reflective comparisons
-            # print("index =", index)
-            # print("min(%d, %d)\n" % (row[index], matrix[column_index][index]))
-            row[index] = min(row[index], matrix[column_index][index]);
-            row[row_index] = min(row[row_index], row[column_index])
+            # print("linkage(%d, %d)" % (row[i], matrix[column_index][i]))
+            row[i] = apply_linkage(row[i], matrix[column_index][i], linkage)
+            # row[row_index] = apply_linkage(row[row_index], row[column_index], linkage)
 
-    # print("After traversal")
-    # print(matrix)
+            r = matrix[i]
+            # print("linkage(%d, %d)" % (r[row_index], r[column_index]))
+            r[row_index] = apply_linkage(r[row_index], r[column_index], linkage)
+
+    print("After traversal")
+    print(matrix)
 
     del matrix[column_index]
     for row in matrix:
         del row[column_index]
 
-    # print("After row/column removal")
-    # print(matrix)
+    print("After row/column removal")
+    print(matrix)
 
 def clusterize(dataset, linkage):
     # (dist_matrix, coords) = distance_matrix(dataset)
