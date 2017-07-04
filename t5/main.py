@@ -71,32 +71,31 @@ def distance_matrix(dataset):
 def table_merge(matrix, coords, linkage):
     (row_index, column_index) = coords
 
-    print(matrix)
-    print(coords)
+    # print(matrix)
+    # print(coords)
 
     # The matrix is always square
     order = len(matrix)
 
-    # Traverses through the row
+    # Merges the relevant cells
     row = matrix[row_index]
-    print("len(row) =", len(row))
     for index in range(order):
         if index != row_index and index != column_index:
             # Skips reflective comparisons
-            print("index =", index)
-            print("min(%d, %d)\n" % (row[index], matrix[column_index][index]))
+            # print("index =", index)
+            # print("min(%d, %d)\n" % (row[index], matrix[column_index][index]))
             row[index] = min(row[index], matrix[column_index][index]);
+            row[row_index] = min(row[row_index], row[column_index])
 
-    print("After row traversal")
-    print(matrix)
+    # print("After traversal")
+    # print(matrix)
 
-    # Traverses through the column
-    # for i in range(order):
-    #     for j in range(matrix[i]):
+    del matrix[column_index]
+    for row in matrix:
+        del row[column_index]
 
-    print("Merge Result")
-    print(matrix)
-
+    # print("After row/column removal")
+    # print(matrix)
 
 def clusterize(dataset, linkage):
     # (dist_matrix, coords) = distance_matrix(dataset)
