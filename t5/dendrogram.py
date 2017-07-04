@@ -72,15 +72,14 @@ def __visit_cluster(tree, labels, xticks, counter = 0):
 
 
 # tree = (((A, B, dist), C, dist), )
-def plot(tree):
+def plot_trees(tree):
     labels = []
     xticks = [0]
-    
-    fig, ax = plt.subplots()
 
     __visit_cluster(tree, labels, xticks)
 
     ml = MultipleLocator(xoffset)
+    ax = plt.axes()
     ax.set_yticks(list(range(len(labels))))
     ax.set_yticklabels(labels)
     ax.set_xlim(0, max(xticks) + xoffset)
@@ -91,9 +90,28 @@ def plot(tree):
     if xgrid:
         ax.xaxis.grid()
 
-    # fig.show()
+def plot_subtrees(trees):
+    labels = []
+    xticks = [0]
 
-    return fig
+    for tree in trees:
+        if isinstance(tree, str):
+            labels.append(tree)
+        else:
+            __visit_cluster(tree, labels, xticks)
+
+    ml = MultipleLocator(xoffset)
+    ax = plt.axes()
+    ax.set_yticks(list(range(len(labels))))
+    ax.set_yticklabels(labels)
+    ax.set_xlim(0, max(xticks) + xoffset)
+    ax.set_xticks(xticks)
+    ax.xaxis.set_minor_locator(ml)
+    ax.yaxis.set_tick_params(width = linewidth)
+    
+    if xgrid:
+        ax.xaxis.grid()
+
 
 def labels_of(tree):
     labels = []
