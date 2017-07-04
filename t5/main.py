@@ -49,19 +49,24 @@ def eucl_dist(first, second):
 # between every pair of elements in the dataset
 def distance_matrix(dataset):
     num_entries = len(dataset)
-    dist_matrix = []
+    dist_matrix = [[0 for x in range(num_entries)] for y in range(num_entries)]
     min_dist = (1, 0)
 
     for first in range(num_entries):
-        dist_matrix.append([])
+        # dist_matrix.append([])
         for second in range(0, first):
             a = dataset[first]
             b = dataset[second]
             distance = eucl_dist(a, b)
-            dist_matrix[first].append(distance)
+            # dist_matrix[first].append(distance)
+            dist_matrix[first][second] = distance
 
             if distance < dist_matrix[min_dist[0]][min_dist[1]]:
                 min_dist = (first, second)
+
+    for i in range(num_entries):
+        for j in range(i + 1, num_entries):
+            dist_matrix[i][j] = dist_matrix[j][i]
 
     return (dist_matrix, min_dist)
     # return dist_matrix
@@ -76,19 +81,19 @@ def apply_linkage(first, second, linkage):
     return None
 
 def pretty_print(matrix):
-    print("[")
+    print("")
     for row in matrix:
-        print("  ", row)
-    print("]")
+        print(row)
+    print("")
 
 # Removes a row/column from a matrix, merging the remaining
 # elements according to a linkage heuristic
 def table_merge(matrix, coords, linkage):
     (row_index, column_index) = coords
 
-    print("\nOriginal:")
-    pretty_print(matrix)
-    print("Coords:", coords)
+    # print("\nOriginal:")
+    # pretty_print(matrix)
+    # print("Coords:", coords)
 
     # The matrix is always square
     order = len(matrix)
@@ -111,8 +116,8 @@ def table_merge(matrix, coords, linkage):
         for j in range(i + 1, order):
             matrix[i][j] = matrix[j][i]
 
-    print("After traversal:")
-    pretty_print(matrix)
+    # print("After traversal:")
+    # pretty_print(matrix)
 
     highest = max(row_index, column_index)
     for i in range(order):
@@ -123,11 +128,13 @@ def table_merge(matrix, coords, linkage):
     # for row in matrix:
     #     del row[column_index]
 
-    print("After row/column removal:")
+    # print("After row/column removal:")
     pretty_print(matrix)
 
 def clusterize(dataset, linkage):
     # (dist_matrix, coords) = distance_matrix(dataset)
+    # pretty_print(dist_matrix)
+
     dist_matrix = [
         [0, 2, 6, 10, 9],
         [2, 0, 5, 1, 8],
@@ -136,18 +143,20 @@ def clusterize(dataset, linkage):
         [9, 8, 5, 3, 0]
     ]
 
-    # coords = (1, 0)
     coords = (3, 1)
+    # coords = (1, 0)
 
-    # labels = [[i] for i in range(len(dist_matrix))]
-    labels = [["A"], ["B"], ["C"], ["D"], ["E"]]
+    labels = [[i] for i in range(len(dist_matrix))]
+    # labels = [["A"], ["B"], ["C"], ["D"], ["E"]]
+    print("Labels:", labels)
+    pretty_print(dist_matrix)
 
     # merges = []
     # merges.append((coords[0], coords[1], dist_matrix[coords[0]][coords[1]]))
 
-    print("dist_matrix:", dist_matrix)
-    print("merge coords:", coords)
-    print("min distance =", dist_matrix[coords[0]][coords[1]])
+    # print("dist_matrix:", dist_matrix)
+    # print("merge coords:", coords)
+    # print("min distance =", dist_matrix[coords[0]][coords[1]])
 
     tree = (labels[coords[0]], labels[coords[1]], dist_matrix[coords[0]][coords[1]])
     # print("Tree:", tree)
@@ -166,11 +175,11 @@ def clusterize(dataset, linkage):
                 if dist_matrix[i][j] < dist_matrix[lowest[0]][lowest[1]]:
                     lowest = (i, j)
 
-        print("------------------------")
-        print("size:", size)
-        print("dist_matrix:", dist_matrix)
-        print("merge coords:", lowest)
-        print("min distance =", dist_matrix[lowest[0]][lowest[1]])
+        # print("------------------------")
+        # print("size:", size)
+        # print("dist_matrix:", dist_matrix)
+        # print("merge coords:", lowest)
+        # print("min distance =", dist_matrix[lowest[0]][lowest[1]])
 
         # tree = (labels[coords[0]], labels[coords[1]], dist_matrix[coords[0]][coords[1]])
         # print("Tree:", tree)
