@@ -97,8 +97,6 @@ def plot(data):
     else:
         (labels, xticks) = __plot_tree(data)
 
-    __visit_cluster(tree, labels, xticks)
-
     ml = MultipleLocator(xoffset)
     ax = plt.axes()
     ax.set_yticks(list(range(len(labels))))
