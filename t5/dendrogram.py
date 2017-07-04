@@ -70,7 +70,7 @@ def __visit_cluster(tree, labels, xticks, counter = 0):
 #             values = [label_xs[l] for l in node[1]]
 #             middle = (max(values) + min(values)) / 2
 
-def __plot_tree(tree)
+def __plot_tree(tree):
     labels = []
     xticks = [0]
 
@@ -92,7 +92,7 @@ def __plot_subtrees(trees):
 
 # tree = (((A, B, dist), C, dist), )
 def plot(data):
-    if isinstance(data, list)
+    if isinstance(data, list):
         (labels, xticks) = __plot_subtrees(data)
     else:
         (labels, xticks) = __plot_tree(data)
