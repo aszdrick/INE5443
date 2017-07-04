@@ -68,7 +68,7 @@ def plot(data):
         (labels, xticks) = __plot_tree(data)
 
     ml = MultipleLocator(xoffset)
-    ax = plt.axes()
+    ax = plt.gca()
     ax.set_yticks(list(range(len(labels))))
     ax.set_yticklabels(labels)
     ax.set_xlim(0, max(xticks) + xoffset)
@@ -78,6 +78,8 @@ def plot(data):
     
     if xgrid:
         ax.xaxis.grid()
+
+    return plt.gcf()
 
 def __labels_of(tree):
     labels = []
