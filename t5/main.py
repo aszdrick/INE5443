@@ -75,13 +75,20 @@ def apply_linkage(first, second, linkage):
         return (first + second) / 2
     return None
 
+def pretty_print(matrix):
+    print("[")
+    for row in matrix:
+        print("  ", row)
+    print("]")
+
 # Removes a row/column from a matrix, merging the remaining
 # elements according to a linkage heuristic
 def table_merge(matrix, coords, linkage):
     (row_index, column_index) = coords
 
-    # print(matrix)
-    # print(coords)
+    print("\nOriginal:")
+    pretty_print(matrix)
+    print("Coords:", coords)
 
     # The matrix is always square
     order = len(matrix)
@@ -98,14 +105,26 @@ def table_merge(matrix, coords, linkage):
             r = matrix[i]
             # print("linkage(%d, %d)" % (r[row_index], r[column_index]))
             r[row_index] = apply_linkage(r[row_index], r[column_index], linkage)
+            r[column_index] = apply_linkage(r[column_index], r[row_index], linkage)
 
-    print("After traversal:", matrix)
+    for i in range(order):
+        for j in range(i + 1, order):
+            matrix[i][j] = matrix[j][i]
 
+    print("After traversal:")
+    pretty_print(matrix)
+
+    highest = max(row_index, column_index)
+    for i in range(order):
+        del matrix[i][highest]
     del matrix[row_index]
-    for row in matrix:
-        del row[column_index]
 
-    print("After row/column removal:", matrix)
+    # del matrix[row_index]
+    # for row in matrix:
+    #     del row[column_index]
+
+    print("After row/column removal:")
+    pretty_print(matrix)
 
 def clusterize(dataset, linkage):
     # (dist_matrix, coords) = distance_matrix(dataset)
@@ -141,13 +160,14 @@ def clusterize(dataset, linkage):
 
     size = len(dist_matrix)
     while size != 1:
-        lowest = (0, 1)
+        lowest = (1, 0)
         for i in range(size):
-            for j in range(size):
-                if i != j and dist_matrix[i][j] < dist_matrix[lowest[0]][lowest[1]]:
+            for j in range(0, i):
+                if dist_matrix[i][j] < dist_matrix[lowest[0]][lowest[1]]:
                     lowest = (i, j)
 
-        print("")
+        print("------------------------")
+        print("size:", size)
         print("dist_matrix:", dist_matrix)
         print("merge coords:", lowest)
         print("min distance =", dist_matrix[lowest[0]][lowest[1]])
@@ -155,8 +175,8 @@ def clusterize(dataset, linkage):
         # tree = (labels[coords[0]], labels[coords[1]], dist_matrix[coords[0]][coords[1]])
         # print("Tree:", tree)
 
-        labels[coords[1]] += labels[coords[0]]
-        del labels[coords[0]]
+        labels[lowest[1]] += labels[lowest[0]]
+        del labels[lowest[0]]
         print("Labels:", labels)
 
         table_merge(dist_matrix, lowest, linkage)
