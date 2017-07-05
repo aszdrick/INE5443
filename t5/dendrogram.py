@@ -56,13 +56,13 @@ def plot(data):
     else:
         (leafs, xticks) = __plot_tree(data)
 
-    ml = MultipleLocator(xoffset)
+    # ml = MultipleLocator(xoffset)
     ax = plt.gca()
     ax.set_yticks(list(range(len(leafs))))
     ax.set_yticklabels(leafs)
     ax.set_xlim(0, max(xticks) + xoffset)
     ax.set_xticks(xticks)
-    ax.xaxis.set_minor_locator(ml)
+    # ax.xaxis.set_minor_locator(ml)
     ax.yaxis.set_tick_params(width = linewidth)
     
     if xgrid:
