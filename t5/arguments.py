@@ -41,7 +41,7 @@ parser.add_argument(
 parser.add_argument(
     "-m",
     "--class_range",
-    required=True
+    required=True,
     type=interval,
     metavar="MIN_VALUE-MAX_VALUE",
     help="Minimum and maximum number of classes"

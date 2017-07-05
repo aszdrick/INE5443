@@ -8,31 +8,14 @@ xoffset = 0.5
 color = "k"
 xgrid = False
 
-# class to encapsulate the fitness function, i.e.,
-# how good is a level using the specified set of weights and
-# interval.
-class LevelEvaluator:
-    # weights = (average weight, sd weight)
-    # interval = (min classes, max classes)
-    def __init__(self, weights, interval, min_avg, min_sd):
-        self.weights = weights
-        self.interval = interval
-        self.min_avg = min_avg
-        self.min_sd = min_sd
-
-    def __call__(self, values):
-        vs = []
-        vs.append(self.min_avg / (values[0] + 1))
-        vs.append(self.min_sd / (values[1] + 1))
-        return sum([w * v for w, v in zip(self.weights, vs)])
-
-def __visit_cluster(tree, labels, xticks, counter = 0):
+# Recursively plots each cluster of dendrogram.
+def __visit_cluster(tree, leafs, xticks, counter = 0):
     if isinstance(tree, tuple):
-        bottom_left = __visit_cluster(tree[0], labels, xticks)
-        bottom_right = __visit_cluster(tree[1], labels, xticks)
+        bottom_left = __visit_cluster(tree[0], leafs, xticks)
+        bottom_right = __visit_cluster(tree[1], leafs, xticks)
     else:
-        labels.append(tree)
-        return (0, len(labels) - 1)
+        leafs.append(tree)
+        return (0, len(leafs) - 1)
 
     plt.plot(
         [bottom_left[0], tree[2], tree[2], bottom_right[0]],
@@ -45,36 +28,38 @@ def __visit_cluster(tree, labels, xticks, counter = 0):
 
     return (tree[2], (bottom_left[1] + bottom_right[1]) / 2)
 
+# Plots a single tree in format of dendrogram.
 def __plot_tree(tree):
-    labels = []
+    leafs = []
     xticks = [0]
 
-    __visit_cluster(tree, labels, xticks)
+    __visit_cluster(tree, leafs, xticks)
 
-    return (labels, xticks)
+    return (leafs, xticks)
 
+# Plots a forest in format of dendrogram.
 def __plot_subtrees(trees):
-    labels = []
+    leafs = []
     xticks = [0]
 
     for tree in trees:
         if isinstance(tree, tuple):
-            __visit_cluster(tree, labels, xticks)
+            __visit_cluster(tree, leafs, xticks)
         else:
-            labels.append(tree)
-    return (labels, xticks)
+            leafs.append(tree)
+    return (leafs, xticks)
 
-
+# Plot dendrograms, either a single tree or forest.
 def plot(data):
     if isinstance(data, list):
-        (labels, xticks) = __plot_subtrees(data)
+        (leafs, xticks) = __plot_subtrees(data)
     else:
-        (labels, xticks) = __plot_tree(data)
+        (leafs, xticks) = __plot_tree(data)
 
     ml = MultipleLocator(xoffset)
     ax = plt.gca()
-    ax.set_yticks(list(range(len(labels))))
-    ax.set_yticklabels(labels)
+    ax.set_yticks(list(range(len(leafs))))
+    ax.set_ytickleafs(leafs)
     ax.set_xlim(0, max(xticks) + xoffset)
     ax.set_xticks(xticks)
     ax.xaxis.set_minor_locator(ml)
@@ -85,16 +70,42 @@ def plot(data):
 
     return plt.gcf()
 
-def __labels_of(tree):
-    labels = []
-    if isinstance(tree, tuple):
-        labels += __labels_of(tree[0])
-        labels += __labels_of(tree[1])
-    else:
-        labels.append(tree)
-    return labels
+# class to encapsulate the fitness function, i.e.,
+# how good is a level (or derivative level) using the specified
+# set of weights and interval.
+class LevelEvaluator:
+    # weights = (average weight, standard deviation weight)
+    # interval = (min classes, max classes)
+    # min_avg = minimum average found in analysed levels
+    # min_sd = minimum standard deviation found in analysed levels
+    def __init__(self, weights, interval, min_avg, min_sd):
+        self.weights = weights
+        self.interval = interval
+        self.min_avg = min_avg
+        self.min_sd = min_sd
 
-def __break_by_two(trees):
+    # Evaluate how good a level (or derivative level) is.
+    def __call__(self, values):
+        vs = []
+        # Normalizes average and standard deviation using the
+        # minimum values.
+        vs.append(self.min_avg / (values[0] + 1))
+        vs.append(self.min_sd / (values[1] + 1))
+        # Multiply each value by its weight and sum all
+        return sum([w * v for w, v in zip(self.weights, vs)])
+
+# Returns all leafs. Each leaf is a tuple of dataset.
+def __leafs_of(tree):
+    leafs = []
+    if isinstance(tree, tuple):
+        leafs += __leafs_of(tree[0])
+        leafs += __leafs_of(tree[1])
+    else:
+        leafs.append(tree)
+    return leafs
+
+# Given a list of trees, each tree is splitted in its children.
+def __split_trees(trees):
     subtrees = []
     for st in trees:
         if isinstance(st, tuple):
@@ -104,6 +115,8 @@ def __break_by_two(trees):
             subtrees.append(st)
     return subtrees
 
+# Given a cluster, returns its distance.
+# Needed to handle cases of unitary cluster, where distance is 0.
 def __distance_of(cluster):
     if isinstance(cluster, tuple):
         return cluster[2]
@@ -148,7 +161,7 @@ def __gather_info(subtrees, interval, level):
                         min_sd = sd
                     marked_subtrees[(avg, sd, level, i)] = derivation
         # Descend one level
-        subtrees = __break_by_two(subtrees)
+        subtrees = __split_trees(subtrees)
 
     return (marked_subtrees, min_avg, min_sd)
 
@@ -159,7 +172,7 @@ def cut(tree, weights, interval):
 
     while len(subtrees) <= interval[0] / 2:
         new_subtrees = []
-        subtrees = __break_by_two(subtrees)
+        subtrees = __split_trees(subtrees)
         subtree_counter = len(subtrees)
         level += 1
 
@@ -180,7 +193,7 @@ def cut(tree, weights, interval):
 def get_clusters(trees):
     clusters = {}
     for i, tree in enumerate(trees):
-        for instance in __labels_of(tree):
+        for instance in __leafs_of(tree):
             clusters[instance] = i
     return clusters
 
@@ -192,15 +205,15 @@ def __levelize(tree, levels, counter = 0):
         levels[counter] = []
     levels[counter].append(tree)
 
-def __levels_of(tree, labels):
-    labels_set = set(labels)
+def __levels_of(tree, leafs):
+    leafs_set = set(leafs)
     levels = {}
     __levelize(tree, levels)
     for (i, level) in levels.items():
-        level_labels = set()
+        level_leafs = set()
         for t in level:
-            level_labels |= set(__labels_of(t))
-        diff = labels_set - level_labels
+            level_leafs |= set(__leafs_of(t))
+        diff = leafs_set - level_leafs
         levels[i] += list(diff)
     return levels
 
@@ -237,14 +250,14 @@ def __best_level(levels, weights, interval):
     return best_level
 
 def cut_by_level(tree, weights, interval):
-    labels = __labels_of(tree)
-    levels = __levels_of(tree, labels)
+    leafs = __leafs_of(tree)
+    levels = __levels_of(tree, leafs)
     max_level = max(levels.keys())
 
     for i in range(max_level + 1):
-        level_labels = []
+        level_leafs = []
         for tup in levels[i]:
-            level_labels += __labels_of(tup)
+            level_leafs += __leafs_of(tup)
         length = len(levels[i])
         if length > interval[1] or length < interval[0]:
             del levels[i]
