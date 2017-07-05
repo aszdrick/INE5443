@@ -12,15 +12,18 @@ xgrid = False
 # how good is a level using the specified set of weights and
 # interval.
 class LevelEvaluator:
-    # weights = (size weight, average weight, stddev weight)
-    def __init__(self, weights, interval):
+    # weights = (average weight, sd weight)
+    # interval = (min classes, max classes)
+    def __init__(self, weights, interval, min_avg, min_sd):
         self.weights = weights
         self.interval = interval
+        self.min_avg = min_avg
+        self.min_sd = min_sd
 
     def __call__(self, values):
         vs = []
-        vs.append(self.min_average / (values[0] + 1))
-        vs.append(self.min_stddev / (values[1] + 1))
+        vs.append(self.min_avg / (values[0] + 1))
+        vs.append(self.min_sd / (values[1] + 1))
         return sum([w * v for w, v in zip(self.weights, vs)])
 
 def __visit_cluster(tree, labels, xticks, counter = 0):
@@ -91,6 +94,96 @@ def __labels_of(tree):
         labels.append(tree)
     return labels
 
+def __break_by_two(trees):
+    subtrees = []
+    for st in trees:
+        if isinstance(st, tuple):
+            subtrees.append(st[0])
+            subtrees.append(st[1])
+        else:
+            subtrees.append(st)
+    return subtrees
+
+def __distance_of(cluster):
+    if isinstance(cluster, tuple):
+        return cluster[2]
+    return 0
+
+def __statistics(subtrees):
+    distances = list(map(__distance_of, subtrees))
+    clusters = len(distances)
+    avg = sum(distances) / clusters
+    sd = math.sqrt(sum(map(lambda x: (x - avg) ** 2, distances)))
+    return (avg, sd, distances)
+
+def __gather_info(subtrees, interval, level):
+    marked_subtrees = {}
+    min_avg = maxsize
+    min_sd = maxsize
+
+    while len(subtrees) < interval[1]:
+        (avg, sd, distances) = __statistics(subtrees)
+        if avg < min_avg:
+            min_avg = avg
+        if sd < min_sd:
+            min_sd = sd
+        marked_subtrees[(avg, sd, level, 0)] = subtrees
+        if len(subtrees) < interval[1]:
+            for (i, distance) in enumerate(distances):
+                if distance > avg:
+                    diff = distance - avg
+                    chosen = subtrees[i]
+                    d0 = __distance_of(chosen[0])
+                    d1 = __distance_of(chosen[1])
+                    if abs(d0 - avg) > diff or abs(d1 - avg) > diff:
+                        continue
+                    derivation = subtrees[:i]
+                    derivation.append(chosen[0])
+                    derivation.append(chosen[1])
+                    derivation += subtrees[i+1:]
+                    (avg, sd, d) = __statistics(derivation)
+                    if avg < min_avg:
+                        min_avg = avg
+                    if sd < min_sd:
+                        min_sd = sd
+                    marked_subtrees[(avg, sd, level, i)] = derivation
+        # Descend one level
+        subtrees = __break_by_two(subtrees)
+
+    return (marked_subtrees, min_avg, min_sd)
+
+def cut(tree, weights, interval):
+    subtree_counter = 1
+    subtrees = [tree]
+    level = 1
+
+    while len(subtrees) <= interval[0] / 2:
+        new_subtrees = []
+        subtrees = __break_by_two(subtrees)
+        subtree_counter = len(subtrees)
+        level += 1
+
+    (marked_subtrees, min_avg, min_sd) = __gather_info(subtrees, interval, level)
+    
+    evaluator = LevelEvaluator(weights, interval, min_avg, min_sd)
+    best_score = 0
+    best_subtree = None
+
+    for key in marked_subtrees:
+        score = evaluator(key[0:2])
+        if score > best_score:
+            best_subtree = key
+
+    print(key)
+    return marked_subtrees[best_subtree]
+
+def get_clusters(trees):
+    clusters = {}
+    for i, tree in enumerate(trees):
+        for instance in __labels_of(tree):
+            clusters[instance] = i
+    return clusters
+
 def __levelize(tree, levels, counter = 0):
     if isinstance(tree, tuple):
         __levelize(tree[0], levels, counter + 1)
@@ -116,24 +209,22 @@ def __best_level(levels, weights, interval):
         if isinstance(x, tuple):
             return x[2]
         return 0
-    evaluator = LevelEvaluator(weights, interval)
     statistics = {}
-    min_average = maxsize
-    min_stddev = maxsize
+    min_avg = maxsize
+    min_sd = maxsize
 
     for (i, level) in levels.items():
         distances = list(map(get_distances, level))
         clusters = len(distances)
-        xm = sum(distances) / clusters
-        stddev = math.sqrt(sum(map(lambda x: (x - xm) ** 2, distances)))
-        statistics[i] = (xm, stddev)
-        if xm < min_average:
-            min_average = xm
-        if stddev < min_stddev:
-            min_stddev = stddev
+        avg = sum(distances) / clusters
+        sd = math.sqrt(sum(map(lambda x: (x - avg) ** 2, distances)))
+        statistics[i] = (avg, sd)
+        if avg < min_avg:
+            min_avg = avg
+        if sd < min_sd:
+            min_sd = sd
 
-    evaluator.min_average = min_average
-    evaluator.min_stddev = min_stddev
+    evaluator = LevelEvaluator(weights, interval, min_avg, min_sd)
     best_level = -1
     best_score = 0
 
@@ -145,7 +236,7 @@ def __best_level(levels, weights, interval):
 
     return best_level
 
-def cut(tree, weights, interval):
+def cut_by_level(tree, weights, interval):
     labels = __labels_of(tree)
     levels = __levels_of(tree, labels)
     max_level = max(levels.keys())
@@ -159,23 +250,4 @@ def cut(tree, weights, interval):
             del levels[i]
 
     chosen_level = __best_level(levels, weights, interval)
-
-    trees = [tree]
-    for i in range(chosen_level):
-        new_trees = []
-        for j in range(len(trees)):
-            if isinstance(trees[j], tuple):
-                new_trees.append(trees[j][0])
-                new_trees.append(trees[j][1])
-            else:
-                new_trees.append(trees[j])
-        trees = new_trees
-
-    return trees
-
-def get_clusters(trees):
-    clusters = {}
-    for i, tree in enumerate(trees):
-        for instance in __labels_of(tree):
-            clusters[instance] = i
-    return clusters
+    return levels[chosen_level]

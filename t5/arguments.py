@@ -41,6 +41,7 @@ parser.add_argument(
 parser.add_argument(
     "-m",
     "--class_range",
+    required=True
     type=interval,
     metavar="MIN_VALUE-MAX_VALUE",
     help="Minimum and maximum number of classes"
@@ -49,7 +50,7 @@ parser.add_argument(
 parser.add_argument(
     "-aw",
     "--average_weight",
-    type=int,
+    type=float,
     default=1,
     help="Mean/average weight"
 )
@@ -57,7 +58,7 @@ parser.add_argument(
 parser.add_argument(
     "-sw",
     "--sd_weight",
-    type=int,
+    type=float,
     default=1,
     help="Standard deviation weight"
 )
