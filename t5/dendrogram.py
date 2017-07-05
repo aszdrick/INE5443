@@ -59,7 +59,7 @@ def plot(data):
     ml = MultipleLocator(xoffset)
     ax = plt.gca()
     ax.set_yticks(list(range(len(leafs))))
-    ax.set_ytickleafs(leafs)
+    ax.set_yticklabels(leafs)
     ax.set_xlim(0, max(xticks) + xoffset)
     ax.set_xticks(xticks)
     ax.xaxis.set_minor_locator(ml)
@@ -187,7 +187,6 @@ def cut(tree, weights, interval):
         if score > best_score:
             best_subtree = key
 
-    print(key)
     return marked_subtrees[best_subtree]
 
 def get_clusters(trees):
