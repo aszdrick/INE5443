@@ -122,79 +122,109 @@ def __distance_of(cluster):
         return cluster[2]
     return 0
 
+# Gather statistics about the level, i.e., distances, average and
+# standard deviation of distances.
 def __statistics(subtrees):
     distances = list(map(__distance_of, subtrees))
-    clusters = len(distances)
-    avg = sum(distances) / clusters
+    avg = sum(distances) / len(distances)
     sd = math.sqrt(sum(map(lambda x: (x - avg) ** 2, distances)))
     return (avg, sd, distances)
 
-def __gather_info(subtrees, interval, level):
-    marked_subtrees = {}
+# Gather information of each level and its derivative levels.
+# A derivative level is a level with at least one of its clusters splitted in
+# its children. For complete analysis, it would be required to combine all
+# possible derivative levels and split more than one time. For simplicity,
+# only one cluster is splitted in each derivative level and only one time.
+def __gather_info(subtrees, interval, current_level):
+    levels = {}
     min_avg = maxsize
     min_sd = maxsize
 
-    while len(subtrees) < interval[1]:
+    while len(subtrees) <= interval[1]:
         (avg, sd, distances) = __statistics(subtrees)
+        # Keep mininum average and standard deviation updated
         if avg < min_avg:
             min_avg = avg
         if sd < min_sd:
             min_sd = sd
-        marked_subtrees[(avg, sd, level, 0)] = subtrees
+        # Each level has as key its avg, sd, current level and derivation. 
+        levels[(avg, sd, current_level, 0)] = subtrees
+        # if it is possible to derivate the level, since it adds one cluster
+        # in size...
         if len(subtrees) < interval[1]:
+            # For each distance, checks if is worth derivate it, i.e.,
+            # if the distance is above the average.
             for (i, distance) in enumerate(distances):
                 if distance > avg:
                     diff = distance - avg
                     chosen = subtrees[i]
                     d0 = __distance_of(chosen[0])
                     d1 = __distance_of(chosen[1])
+                    # If one of the new clusters are more distant from average,
+                    # does not count this derivation.
                     if abs(d0 - avg) > diff or abs(d1 - avg) > diff:
                         continue
+                    # Mount derivation
                     derivation = subtrees[:i]
                     derivation.append(chosen[0])
                     derivation.append(chosen[1])
                     derivation += subtrees[i+1:]
+                    # Do the same analysis for the derivation, storing in levels
+                    # as well.
                     (avg, sd, d) = __statistics(derivation)
                     if avg < min_avg:
                         min_avg = avg
                     if sd < min_sd:
                         min_sd = sd
-                    marked_subtrees[(avg, sd, level, i)] = derivation
+                    levels[(avg, sd, current_level, i)] = derivation
         # Descend one level
         subtrees = __split_trees(subtrees)
+        current_level += 1
 
-    return (marked_subtrees, min_avg, min_sd)
+    return (levels, min_avg, min_sd)
 
+# Cut a tree in subtrees according to weights and interval specified.
 def cut(tree, weights, interval):
     subtree_counter = 1
     subtrees = [tree]
     level = 1
 
+    # Aproximate the division of tree to the minimum number of clusters,
+    # since it is useless to analyse this levels.
     while len(subtrees) <= interval[0] / 2:
         new_subtrees = []
         subtrees = __split_trees(subtrees)
         subtree_counter = len(subtrees)
         level += 1
 
-    (marked_subtrees, min_avg, min_sd) = __gather_info(subtrees, interval, level)
+    # Analyse all other levels and derivatives.
+    (levels, min_avg, min_sd) = __gather_info(subtrees, interval, level)
     
+    # Create a evaluator to classify how good a level is.
     evaluator = LevelEvaluator(weights, interval, min_avg, min_sd)
     best_score = 0
-    best_subtree = None
+    best_level = None
 
-    for key in marked_subtrees:
+    # Discover which level is better.
+    for key in levels:
         score = evaluator(key[0:2])
         if score > best_score:
-            best_subtree = key
+            best_level = key
 
-    return marked_subtrees[best_subtree]
+    return levels[best_level]
 
+# Returns a map of leaf -> cluster id.
+# As leaf identifies the instance, it can be used as a map
+# of instance -> class.
 def get_clusters(trees):
     clusters = {}
     for i, tree in enumerate(trees):
         for instance in __leafs_of(tree):
             clusters[instance] = i
     return clusters
+
+# -----------------------------------------------------------------------------
+# The functions below are not used. It is an old version of cut.
 
 def __levelize(tree, levels, counter = 0):
     if isinstance(tree, tuple):
@@ -248,7 +278,7 @@ def __best_level(levels, weights, interval):
 
     return best_level
 
-def cut_by_level(tree, weights, interval):
+def pure_cut(tree, weights, interval):
     leafs = __leafs_of(tree)
     levels = __levels_of(tree, leafs)
     max_level = max(levels.keys())
